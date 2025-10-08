@@ -47,9 +47,6 @@ public class AuthController {
         try {
             boolean isValid = authService.verifyEmail(request).isValid();
             ValidationDTOResponse response = new ValidationDTOResponse(isValid);
-            if (!isValid) {
-                return buildResponse("Token is invalid", HttpStatus.UNAUTHORIZED, false, response);
-            }
             return buildResponse("Token is valid", HttpStatus.OK, true, response);
         } catch (Exception e) {
             return handleError(e);

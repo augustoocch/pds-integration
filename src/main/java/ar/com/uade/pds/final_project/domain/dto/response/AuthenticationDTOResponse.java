@@ -7,4 +7,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public class AuthenticationDTOResponse {
     private String token;
+    private String username;
+    private String email;
 }
