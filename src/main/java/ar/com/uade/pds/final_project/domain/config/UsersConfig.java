@@ -20,7 +20,8 @@ public class UsersConfig {
     }
 
     @Bean
-    public AuthService authService(IUserRepository iUserRepository, SecurityValidator securityValidator) {
+    public AuthService authService(IUserRepository iUserRepository,
+                                   ISecurityValidator securityValidator) {
         return new AuthServiceImpl(iUserRepository, securityValidator);
     }
 }

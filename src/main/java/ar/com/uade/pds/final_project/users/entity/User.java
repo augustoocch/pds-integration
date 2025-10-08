@@ -1,13 +1,16 @@
 package ar.com.uade.pds.final_project.users.entity;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import java.util.List;
 
+@Entity
 @Builder
 @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "users")
 public class User {
     @Id
@@ -20,20 +23,25 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "password_hash")
     private String passwordHash;
 
+    @Column(name = "range_per_game")
     private String rangePerGame;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @CollectionTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id")
+    )
     @Enumerated(EnumType.STRING)
+    @Column(name = "preferred_roles")
     private List<Role> preferredRoles;
 
     private String region;
     private String preference;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "email_verified")
     private boolean emailVerified;
 
     public void verifyEmail() {

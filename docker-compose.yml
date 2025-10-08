@@ -1,0 +1,26 @@
+
+services:
+  mysql-db:
+    image: mysql:8.0
+    container_name: project-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: pds_project
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --bind-address=0.0.0.0
+    restart: unless-stopped
+    networks:
+      - project-network
+
+volumes:
+  mysql_data:
+
+networks:
+  project-network:
+    driver: bridge
