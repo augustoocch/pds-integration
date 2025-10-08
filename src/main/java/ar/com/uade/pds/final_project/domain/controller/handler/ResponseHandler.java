@@ -2,10 +2,10 @@ package ar.com.uade.pds.final_project.domain.controller.handler;
 
 import ar.com.uade.pds.final_project.domain.dto.response.ExceptionDTO;
 import ar.com.uade.pds.final_project.domain.dto.response.ResponseWrapper;
-import lombok.AllArgsConstructor;
+import ar.com.uade.pds.final_project.security.exception.SecurityException;
+import ar.com.uade.pds.final_project.users.exception.UsersException;
 import org.springframework.http.HttpStatus;
 
-@AllArgsConstructor
 public class ResponseHandler {
 
     public static ResponseWrapper buildResponse(String message, HttpStatus status,
@@ -19,15 +19,32 @@ public class ResponseHandler {
     }
 
     public static ResponseWrapper handleError(Exception ex) {
-        ExceptionDTO errorResponse = new ExceptionDTO(
-                "An unexpected error occurred: " + ex.getMessage(),
-                HttpStatus.INTERNAL_SERVER_ERROR.value()
-        );
-        return ResponseWrapper.builder()
-                .data(errorResponse)
-                .message("An unexpected error occurred")
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .success(false)
-                .build();
+        ResponseWrapper response = handleKnownErrors(ex);
+        if (response == null) {
+            ExceptionDTO errorResponse = new ExceptionDTO(
+                    "An unexpected error occurred: " + ex.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR.value()
+            );
+            return buildResponse(errorResponse.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR, false, errorResponse);
+        }
+        return response;
+    }
+
+    private static ResponseWrapper handleKnownErrors(Exception ex) {
+        if (ex instanceof SecurityException) {
+            ExceptionDTO errorResponse = new ExceptionDTO(
+                    ex.getMessage(),
+                    HttpStatus.UNAUTHORIZED.value()
+            );
+            return buildResponse(ex.getMessage(), HttpStatus.UNAUTHORIZED, false, errorResponse);
+        } else if (ex instanceof UsersException) {
+            ExceptionDTO errorResponse = new ExceptionDTO(
+                    ex.getMessage(),
+                    HttpStatus.BAD_REQUEST.value()
+            );
+            return buildResponse(ex.getMessage(), HttpStatus.BAD_REQUEST, false, errorResponse);
+        }
+        return null;
     }
 }
