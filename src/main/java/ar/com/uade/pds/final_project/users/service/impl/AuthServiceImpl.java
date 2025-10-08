@@ -11,9 +11,7 @@ import ar.com.uade.pds.final_project.users.exception.UsersException;
 import ar.com.uade.pds.final_project.users.repository.IUserRepository;
 import ar.com.uade.pds.final_project.users.service.AuthService;
 import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Service;
 
-@Service
 @AllArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
