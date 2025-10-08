@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 
 
 @Configuration
-@AllArgsConstructor
 public class ProjectConfig {
 
     @Value("${app.security.secret-key}")

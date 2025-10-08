@@ -38,6 +38,7 @@ public class FinalProjectApplication {
                 case "0" -> {
                     running = false;
                     System.out.println("Saliendo de la aplicación...");
+                    System.exit(0);
                 }
                 default -> System.out.println("Opción inválida. Intenta nuevamente.");
             }
