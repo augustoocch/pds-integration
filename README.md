@@ -35,3 +35,16 @@ Tenes que ver algo como
 
 
 <img width="907" height="349" alt="Screenshot 2025-10-08 at 1 24 31 PM" src="https://github.com/user-attachments/assets/b69f0836-e7e2-4ebf-a10e-988efcbd8fce" />
+
+
+
+### VIDEO TUTORIAL
+
+
+
+https://github.com/user-attachments/assets/8aa4be68-4031-4d11-a867-111fd6024b07
+
+
+
+
+
