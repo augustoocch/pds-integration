@@ -5,7 +5,9 @@ import ar.com.uade.pds.final_project.security.ISecurityValidator;
 import ar.com.uade.pds.final_project.security.SecurityValidator;
 import ar.com.uade.pds.final_project.users.repository.IUserRepository;
 import ar.com.uade.pds.final_project.users.service.AuthService;
+import ar.com.uade.pds.final_project.users.service.DataService;
 import ar.com.uade.pds.final_project.users.service.impl.AuthServiceImpl;
+import ar.com.uade.pds.final_project.users.service.impl.DataServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -23,5 +25,10 @@ public class UsersConfig {
     public AuthService authService(IUserRepository iUserRepository,
                                    ISecurityValidator securityValidator) {
         return new AuthServiceImpl(iUserRepository, securityValidator);
+    }
+
+    @Bean
+    public DataService dataService(IUserRepository iUserRepository) {
+        return new DataServiceImpl(iUserRepository);
     }
 }

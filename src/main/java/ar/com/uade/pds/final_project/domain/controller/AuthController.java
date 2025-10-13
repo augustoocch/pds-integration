@@ -14,8 +14,8 @@ import org.springframework.stereotype.Controller;
 import static ar.com.uade.pds.final_project.domain.controller.handler.ResponseHandler.buildResponse;
 import static ar.com.uade.pds.final_project.domain.controller.handler.ResponseHandler.handleError;
 
-@AllArgsConstructor
 @Controller
+@AllArgsConstructor
 public class AuthController {
     private final AuthService authService;
 

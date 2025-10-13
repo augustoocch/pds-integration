@@ -35,9 +35,8 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id")
     )
     @Enumerated(EnumType.STRING)
-    @Column(name = "preferred_roles")
+    @Column(name = "roles")
     private List<Role> preferredRoles;
-
     private String region;
     private String preference;
 
