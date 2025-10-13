@@ -1,5 +1,8 @@
 package ar.com.uade.pds.final_project.scrim.entity;
 
+import ar.com.uade.pds.final_project.scrim.business.ScrimState;
+import ar.com.uade.pds.final_project.scrim.business.ScrimStateType;
+import ar.com.uade.pds.final_project.scrim.business.Searching;
 import ar.com.uade.pds.final_project.users.entity.Role;
 import ar.com.uade.pds.final_project.users.entity.User;
 import jakarta.persistence.*;

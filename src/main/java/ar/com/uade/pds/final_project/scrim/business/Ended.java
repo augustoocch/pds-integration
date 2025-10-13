@@ -1,4 +1,6 @@
-package ar.com.uade.pds.final_project.scrim.entity;
+package ar.com.uade.pds.final_project.scrim.business;
+
+import ar.com.uade.pds.final_project.scrim.entity.Scrim;
 
 public class Ended implements ScrimState {
 

@@ -1,4 +1,4 @@
-package ar.com.uade.pds.final_project.scrim.entity;
+package ar.com.uade.pds.final_project.scrim.business;
 
 import java.util.Arrays;
 import java.util.Map;

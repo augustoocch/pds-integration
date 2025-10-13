@@ -1,10 +1,12 @@
-package ar.com.uade.pds.final_project.scrim.entity;
+package ar.com.uade.pds.final_project.scrim.business;
 
-public class Lobby implements ScrimState {
+import ar.com.uade.pds.final_project.scrim.entity.Scrim;
+
+public class Confirmed implements ScrimState {
 
     @Override
     public void start(Scrim scrim) {
-        scrim.setState(new InGame());
+        throw new IllegalStateException("Scrim already confirmed");
     }
 
     @Override
@@ -14,7 +16,7 @@ public class Lobby implements ScrimState {
 
     @Override
     public void confirm(Scrim scrim) {
-        scrim.setState(new Confirmed());
+        throw new IllegalStateException("Scrim already confirmed");
     }
 
     @Override
