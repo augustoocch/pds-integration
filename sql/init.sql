@@ -69,3 +69,10 @@ CREATE TABLE scrim_participants (
     FOREIGN KEY (scrim_id) REFERENCES scrim(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+CREATE TABLE IF NOT EXISTS notification_subscribers (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    address VARCHAR(255) NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    event VARCHAR(100) NOT NULL
+);
