@@ -3,6 +3,7 @@ package ar.com.uade.pds.final_project.domain.config;
 
 import ar.com.uade.pds.final_project.security.ISecurityValidator;
 import ar.com.uade.pds.final_project.security.SecurityValidator;
+import ar.com.uade.pds.final_project.users.Business.SessionContext;
 import ar.com.uade.pds.final_project.users.repository.IUserRepository;
 import ar.com.uade.pds.final_project.users.service.AuthService;
 import ar.com.uade.pds.final_project.users.service.DataService;
@@ -22,13 +23,23 @@ public class UsersConfig {
     }
 
     @Bean
-    public AuthService authService(IUserRepository iUserRepository,
-                                   ISecurityValidator securityValidator) {
-        return new AuthServiceImpl(iUserRepository, securityValidator);
+    public SessionContext sessionContext() {
+        return new SessionContext();
     }
 
     @Bean
-    public DataService dataService(IUserRepository iUserRepository) {
-        return new DataServiceImpl(iUserRepository);
+    public AuthService authService(IUserRepository iUserRepository,
+                                   ISecurityValidator securityValidator,
+                                   SessionContext sessionContext
+                                   ) {
+        return new AuthServiceImpl(iUserRepository, securityValidator, sessionContext);
+    }
+
+    @Bean
+    public DataService dataService(IUserRepository iUserRepository,
+                                   ISecurityValidator securityValidator,
+                                   SessionContext sessionContext
+                                   ) {
+        return new DataServiceImpl(iUserRepository, sessionContext, securityValidator);
     }
 }

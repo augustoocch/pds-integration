@@ -13,5 +13,6 @@ public interface ScrimService {
     ValidationDTOResponse cancelScrim(Long id);
     ValidationDTOResponse confirmScrim(Long id);
     List<ScrimDTO> searchScrim(SearchRequest request);
-    ValidationDTOResponse joinQueue(JoinScrimRequest request) ;
+    ValidationDTOResponse joinQueue(JoinScrimRequest request);
+    List<ScrimDTO> searchAvailableScrims();
 }

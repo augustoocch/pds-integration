@@ -1,12 +1,18 @@
-package ar.com.uade.pds.final_project.scrim.business;
+package ar.com.uade.pds.final_project.scrim.business.game.state;
 
 import ar.com.uade.pds.final_project.scrim.entity.Scrim;
+import lombok.extern.slf4j.Slf4j;
 
-public class Searching implements ScrimState {
+@Slf4j
+public class Lobby implements ScrimState {
+
+    public Lobby() {
+        log.info("Scrim in Lobby state!");
+    }
 
     @Override
     public void start(Scrim scrim) {
-        throw new IllegalStateException("Scrim not in lobby");
+        throw new IllegalStateException("Scrim must be confirmed before starting");
     }
 
     @Override
@@ -16,7 +22,7 @@ public class Searching implements ScrimState {
 
     @Override
     public void confirm(Scrim scrim) {
-        throw new IllegalStateException("Scrim not in lobby");
+        scrim.setState(new Confirmed(scrim));
     }
 
     @Override

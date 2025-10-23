@@ -3,18 +3,13 @@ package ar.com.uade.pds.final_project.notifications.service.impl;
 import ar.com.uade.pds.final_project.notifications.event.DomainEvent;
 import ar.com.uade.pds.final_project.notifications.repository.NotificationRepository;
 import ar.com.uade.pds.final_project.notifications.service.NotificationService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
-@Primary
+@AllArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
-
-    @Autowired
     private NotificationRepository notificationRepository;
-
-    @Autowired
     private NotificationManager notificationManager;
 
     @Override

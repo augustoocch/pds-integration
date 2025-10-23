@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS scrim (
     region VARCHAR(255),
     latency VARCHAR(255),
     est_duration INT,
-    modal VARCHAR(255),
+    mode VARCHAR(255),
     state_type VARCHAR(50)
 );
 

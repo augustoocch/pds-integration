@@ -16,5 +16,8 @@ public interface IScrimRepository extends JpaRepository<Scrim, Long> {
     List<Scrim> findByFilters(@Param("game") String game,
                               @Param("region") String region,
                               @Param("format") String format);
+
+
+    List<Scrim> findFirstByStateType(String stateType);
 }
 

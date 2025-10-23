@@ -46,7 +46,7 @@ public class AuthController {
     public ResponseWrapper validateToken(EmailVerificationRequest request) {
         try {
             boolean isValid = authService.verifyEmail(request).isValid();
-            ValidationDTOResponse response = new ValidationDTOResponse(isValid);
+            ValidationDTOResponse response = new ValidationDTOResponse(isValid, null);
             return buildResponse("Token is valid", HttpStatus.OK, true, response);
         } catch (Exception e) {
             return handleError(e);

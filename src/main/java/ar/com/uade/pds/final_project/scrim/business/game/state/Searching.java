@@ -1,12 +1,12 @@
-package ar.com.uade.pds.final_project.scrim.business;
+package ar.com.uade.pds.final_project.scrim.business.game.state;
 
 import ar.com.uade.pds.final_project.scrim.entity.Scrim;
 
-public class Lobby implements ScrimState {
+public class Searching implements ScrimState {
 
     @Override
     public void start(Scrim scrim) {
-        scrim.setState(new InGame());
+        throw new IllegalStateException("Scrim not in lobby");
     }
 
     @Override
@@ -16,7 +16,7 @@ public class Lobby implements ScrimState {
 
     @Override
     public void confirm(Scrim scrim) {
-        scrim.setState(new Confirmed());
+        throw new IllegalStateException("Scrim not in lobby");
     }
 
     @Override

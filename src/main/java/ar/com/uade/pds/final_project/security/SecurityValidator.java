@@ -48,7 +48,7 @@ public class SecurityValidator implements ISecurityValidator {
                     .parseClaimsJws(token)
                     .getBody();
 
-            return User.builder()
+            return new User.Builder()
                     .email(claims.getSubject())
                     .username((String) claims.get("username"))
                     .region((String) claims.get("region"))

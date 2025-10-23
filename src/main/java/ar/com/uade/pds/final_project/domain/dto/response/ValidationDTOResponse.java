@@ -8,8 +8,10 @@ import lombok.Setter;
 @Getter
 public class ValidationDTOResponse {
     private boolean valid;
+    private Object data;
 
-    public ValidationDTOResponse(boolean isValid) {
+    public ValidationDTOResponse(boolean isValid, Object data) {
+        this.data = data;
         this.valid = isValid;
     }
 }

@@ -1,5 +1,8 @@
 package ar.com.uade.pds.final_project.notifications.model;
 
+import lombok.Getter;
+
+@Getter
 public class SubscriberData {
     private Long userId;
     private String address;
@@ -12,9 +15,4 @@ public class SubscriberData {
         this.type = type;
         this.event = event;
     }
-
-    public Long getUserId() { return userId; }
-    public String getAddress() { return address; }
-    public String getType() { return type; }
-    public String getEvent() { return event; }
 }

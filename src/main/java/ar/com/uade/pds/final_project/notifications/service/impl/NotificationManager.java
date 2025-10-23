@@ -3,18 +3,15 @@ package ar.com.uade.pds.final_project.notifications.service.impl;
 import ar.com.uade.pds.final_project.notifications.event.DomainEvent;
 import ar.com.uade.pds.final_project.notifications.model.*;
 import ar.com.uade.pds.final_project.notifications.repository.NotificationRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
+@AllArgsConstructor
 public class NotificationManager {
-
     private final NotificationRepository notificationRepository;
-
-    public NotificationManager(NotificationRepository notificationRepository) {
-        this.notificationRepository = notificationRepository;
-    }
 
     public void processEvent(DomainEvent event) {
         List<SubscriberData> subs = notificationRepository.findSubscribers(event);
