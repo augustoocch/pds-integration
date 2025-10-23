@@ -70,8 +70,10 @@ public class DataServiceImpl implements DataService {
     }
 
     @Override
-    public User findUser(Long id) {
-        return this.userRepository.findById(id)
-                .orElseThrow(() -> new UsersException("User not found"));
+    public User findUserWithToken() {
+        String token = this.sessionContext.getToken();
+        User userFromToken = this.securityValidator.getUserFromToken(token);
+        return this.userRepository.findByEmail(userFromToken.getEmail())
+                .orElseThrow(() -> new UsersException(UsersErrorDetails.USER_NOT_FOUND.getMessage()));
     }
 }

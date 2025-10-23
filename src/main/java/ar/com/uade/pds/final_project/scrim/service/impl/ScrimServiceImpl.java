@@ -21,11 +21,13 @@ import ar.com.uade.pds.final_project.users.exception.UsersException;
 import ar.com.uade.pds.final_project.users.service.DataService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @Transactional
 @AllArgsConstructor
@@ -37,7 +39,7 @@ public class ScrimServiceImpl implements ScrimService {
     @Override
     public ValidationDTOResponse createScrim(ScrimCreationRequest request) {
 
-        if(dataService.checkIsAuthenticated()) {
+        if(!dataService.checkIsAuthenticated()) {
             throw new UsersException(UsersErrorDetails.USER_NOT_AUTHENTICATED.getMessage());
         }
         GameFormat gameFormat = GameFormat.fromString(request.getFormat());
@@ -69,10 +71,8 @@ public class ScrimServiceImpl implements ScrimService {
 
     @Override
     public ValidationDTOResponse endScrim(Long id) {
-        Scrim scrim = scrimRepository.findById(id).orElse(null);
-        if (scrim == null) {
-            throw new ScrimException(ErrorDescription.SCRIM_NOT_FOUND.getDescription());
-        }
+        Scrim scrim = scrimRepository.findById(id)
+                .orElseThrow(() -> new ScrimException(ErrorDescription.SCRIM_NOT_FOUND.getDescription()));
         try {
             scrim.end();
             scrimRepository.save(scrim);
@@ -104,12 +104,14 @@ public class ScrimServiceImpl implements ScrimService {
 
     @Override
     public ValidationDTOResponse confirmScrim(Long id) {
-        Scrim scrim = scrimRepository.findById(id).orElse(null);
-        if (scrim == null) {
-            throw new ScrimException(ErrorDescription.SCRIM_NOT_FOUND.getDescription());
-        }
+        Scrim scrim = scrimRepository.findById(id)
+                .orElseThrow(() -> new ScrimException(ErrorDescription.SCRIM_NOT_FOUND.getDescription()));
         try {
-            scrim.confirm();
+            User currentUser = dataService.findUserWithToken();
+            if(currentUser == null) {
+                throw new ScrimException(ErrorDescription.USER_NOT_FOUND.getDescription());
+            }
+            scrim.confirm(currentUser);
             scrimRepository.save(scrim);
             return new ValidationDTOResponse(true, null);
         } catch (Exception e) {
@@ -118,15 +120,26 @@ public class ScrimServiceImpl implements ScrimService {
     }
 
     @Override
-    public List<ScrimDTO> searchScrim(SearchRequest request) {
+    public List<ScrimDTO> searchScrims(SearchRequest request) {
         List<Scrim> scrims = scrimRepository.findByFilters(
                 request.getGame(),
                 request.getRegion(),
                 request.getFormat()
         );
 
+        if(scrims.isEmpty()) {
+            System.out.println("No se encontraron scrims con los filtros proporcionados.");
+            List<ScrimDTO> others = this.searchAvailableScrims();
+            if(others.isEmpty()) {
+                 throw new ScrimException(ErrorDescription.NOT_AVAILABLE_SCRIMS.getDescription());
+            }
+            System.out.println("Sin embargo, Se encontraron scrims disponibles sin filtros");
+            return others;
+        }
+
         return scrims.stream()
                 .map(scrim -> new ScrimDTO.Builder()
+                        .id(scrim.getId())
                         .game(scrim.getGame())
                         .format(scrim.getFormat())
                         .latency(scrim.getLatency())
@@ -142,17 +155,22 @@ public class ScrimServiceImpl implements ScrimService {
 
     @Override
     public ValidationDTOResponse joinQueue(JoinScrimRequest request) {
+        if(!dataService.checkIsAuthenticated()) {
+            throw new UsersException(UsersErrorDetails.USER_NOT_AUTHENTICATED.getMessage());
+        }
         Scrim scrim = scrimRepository.findById(request.getIdScrim())
-                .orElse(null);
+                .orElseThrow(() -> new ScrimException(ErrorDescription.SCRIM_NOT_FOUND.getDescription()));
 
-        validateJoinableScrim(scrim);
-        User currentUser = dataService.findUser(request.getUserId());
+        User currentUser = dataService.findUserWithToken();
         if(currentUser == null) {
             throw new ScrimException(ErrorDescription.USER_NOT_FOUND.getDescription());
         }
+        validateJoinableScrim(scrim, currentUser.getId());
+        System.out.println("Scrim es valido para unirse! --- Agregandote a la cola...");
         scrim.addParticipant(currentUser);
         if (scrim.isFull()) {
-            scrim.setState(new Lobby());
+            scrim.setStateType(ScrimStateType.LOBBY);
+            System.out.println("Scrim lleno! Cambiando estado a LOBBY...");
         }
         scrimRepository.save(scrim);
         return new ValidationDTOResponse(true, null);
@@ -160,12 +178,13 @@ public class ScrimServiceImpl implements ScrimService {
 
     @Override
     public List<ScrimDTO> searchAvailableScrims() {
-        List<Scrim> scrim = scrimRepository.findFirstByStateType(ScrimStateType.SEARCHING.name());
+        List<Scrim> scrim = scrimRepository.findAllByStateType(ScrimStateType.SEARCHING);
         if (scrim.isEmpty()) {
             throw new ScrimException(ErrorDescription.NOT_AVAILABLE_SCRIMS.getDescription());
         }
         return scrim.stream()
                 .map(s -> new ScrimDTO.Builder()
+                        .id(s.getId())
                         .game(s.getGame())
                         .format(s.getFormat())
                         .latency(s.getLatency())
@@ -179,7 +198,7 @@ public class ScrimServiceImpl implements ScrimService {
                 ).collect(Collectors.toList());
     }
 
-    private void validateJoinableScrim(Scrim scrim) {
+    private void validateJoinableScrim(Scrim scrim, Long userId) {
         if (scrim == null) {
             throw new ScrimException(ErrorDescription.SCRIM_NOT_FOUND.getDescription());
         }
@@ -189,5 +208,12 @@ public class ScrimServiceImpl implements ScrimService {
         if (scrim.isFull()) {
             throw new ScrimException(ErrorDescription.SCRIM_FULL.getDescription());
         }
+        scrim.getParticipants().stream()
+                .filter(user -> user.getId().equals(userId))
+                .findFirst()
+                .ifPresent(user -> {
+                    throw new ScrimException(ErrorDescription.USER_ALREADY_IN_SCRIM
+                            .getDescription());
+                });
     }
 }

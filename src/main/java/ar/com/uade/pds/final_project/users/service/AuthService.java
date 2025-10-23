@@ -10,4 +10,5 @@ public interface AuthService {
     AuthenticationDTOResponse authenticate(AuthenticationRequest request);
     ValidationDTOResponse register(RegisterRequest request);
     ValidationDTOResponse verifyEmail(EmailVerificationRequest request);
+    void logout();
 }

@@ -10,5 +10,5 @@ public interface DataService {
     void updateProfile(UpdateProfileRequest request);
     UserDTO findDTOUser(Long id);
     UserDTO findDTOUserWithToken();
-    User findUser(Long id);
+    User findUserWithToken();
 }

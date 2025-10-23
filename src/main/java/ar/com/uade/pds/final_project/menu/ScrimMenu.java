@@ -7,9 +7,11 @@ import ar.com.uade.pds.final_project.domain.dto.request.JoinScrimRequest;
 import ar.com.uade.pds.final_project.domain.dto.request.ScrimCreationRequest;
 import ar.com.uade.pds.final_project.domain.dto.request.SearchRequest;
 import ar.com.uade.pds.final_project.domain.dto.response.ResponseWrapper;
+import ar.com.uade.pds.final_project.domain.dto.response.ScrimDTO;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Scanner;
 
 @Component
@@ -83,29 +85,48 @@ public class ScrimMenu {
 
     private void handleSearchScrim(Scanner scanner) {
         System.out.println("\n--- Buscar Scrims ---");
-        System.out.print("Juego: ");
+        System.out.print("Juego (desert, urban, space): ");
         String game = scanner.nextLine();
-        System.out.print("Región: ");
+        System.out.print("Region (LATAM, US, EU, ASIA): ");
         String region = scanner.nextLine();
-        System.out.print("Formato: ");
+        System.out.print("Formato (1V1, 2V2, 5V5): ");
         String format = scanner.nextLine();
 
         SearchRequest request = new SearchRequest(game, region, format);
         ResponseWrapper response = controller.searchScrim(request);
-        System.out.println(response.getMessage());
-        if (response.getData() != null) {
-            System.out.println(response.getData());
+        if(!response.isSuccess()) {
+            System.out.println("Error al buscar scrims: " + response.getMessage());
+            return;
         }
+        List<ScrimDTO> dtos = (List<ScrimDTO>) response.getData();
+        printAllScrimsFound(dtos);
     }
 
     private void handleJoinQueue(Scanner scanner) {
         System.out.print("ID del scrim: ");
         Long idScrim = Long.parseLong(scanner.nextLine());
-        System.out.print("ID del usuario: ");
-        Long userId = Long.parseLong(scanner.nextLine());
 
-        JoinScrimRequest request = new JoinScrimRequest(idScrim, userId);
+        JoinScrimRequest request = new JoinScrimRequest(idScrim);
         ResponseWrapper response = controller.joinQueue(request);
         System.out.println(response.getMessage());
+    }
+
+
+
+    public void printAllScrimsFound(List<ScrimDTO> scrims) {
+        if (scrims.isEmpty()) {
+            System.out.println("No se encontraron scrims.");
+        } else {
+            System.out.println("Scrims encontrados:");
+            for (ScrimDTO scrim : scrims) {
+                System.out.println("- Id: " + scrim.getId());
+                System.out.println("  Juego: " + scrim.getGame());
+                System.out.println("  Formato: " + scrim.getFormat());
+                System.out.println("  Latencia: " + scrim.getLatency());
+                System.out.println("  Región: " + scrim.getRegion());
+                System.out.println("  Modo: " + scrim.getMode());
+                System.out.println();
+            }
+        }
     }
 }

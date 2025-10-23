@@ -6,7 +6,8 @@ public enum ErrorDescription {
     NOT_AVAILABLE_SCRIMS("No available scrims to join"),
     SCRIM_FULL("Scrim is full"),
     INVALID_SCRIM_STATE("Invalid scrim state for this operation"),
-    SCRIM_CANNOT_CHANGE_STATE("Scrim cannot be ended in its current state");
+    SCRIM_CANNOT_CHANGE_STATE("Scrim cannot be ended in its current state"),
+    USER_ALREADY_IN_SCRIM("User is already participating in this scrim");
 
     private final String description;
 

@@ -7,6 +7,7 @@ import java.util.List;
 
 @Getter
 public class ScrimDTO {
+    private Long id;
     private String game;
     private String format;
     private int players;
@@ -19,6 +20,7 @@ public class ScrimDTO {
 
     // Constructor privado para que solo se pueda construir mediante el Builder
     private ScrimDTO(Builder builder) {
+        this.id = builder.id;
         this.game = builder.game;
         this.format = builder.format;
         this.players = builder.players;
@@ -32,6 +34,7 @@ public class ScrimDTO {
 
     // Builder manual
     public static class Builder {
+        private Long id;
         private String game;
         private String format;
         private int players;
@@ -41,6 +44,11 @@ public class ScrimDTO {
         private int estDuration;
         private String mode;
         private String state;
+
+        public Builder id(Long id) {
+            this.id = id;
+            return this;
+        }
 
         public Builder game(String game) {
             this.game = game;

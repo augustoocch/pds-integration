@@ -5,7 +5,6 @@ import ar.com.uade.pds.final_project.domain.controller.ScrimController;
 import ar.com.uade.pds.final_project.domain.dto.request.*;
 import ar.com.uade.pds.final_project.menu.AuthMenu;
 import ar.com.uade.pds.final_project.menu.ScrimMenu;
-import ar.com.uade.pds.final_project.users.Business.SessionContext;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;

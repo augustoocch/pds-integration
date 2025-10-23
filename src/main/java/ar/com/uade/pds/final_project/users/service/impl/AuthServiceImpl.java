@@ -71,6 +71,11 @@ public class AuthServiceImpl implements AuthService {
         return new ValidationDTOResponse(true, null);
     }
 
+    @Override
+    public void logout() {
+        sessionContext.clearSession();
+    }
+
     private void validateRegisterRequest(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new UsersException(UsersErrorDetails.USER_EMAIL_ALREADY_EXISTS.getMessage());

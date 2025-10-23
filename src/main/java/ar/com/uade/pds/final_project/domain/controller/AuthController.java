@@ -52,4 +52,13 @@ public class AuthController {
             return handleError(e);
         }
     }
+
+    public ResponseWrapper logout() {
+        try {
+            authService.logout();
+            return buildResponse("Logout successful", HttpStatus.OK, true, null);
+        } catch (Exception e) {
+            return handleError(e);
+        }
+    }
 }

@@ -45,6 +45,22 @@ Tenes que ver algo como
 https://github.com/user-attachments/assets/8aa4be68-4031-4d11-a867-111fd6024b07
 
 
+### Matar el docker y el volumen
 
+    ``` 
+        docker-compose down -v
+    ``` 
+### Ingresar al docker mysql
 
+    ``` 
+        docker exec -it project-mysql mysql -u root -p
+    ```
+
+ - Select luego de login
+
+    ``` 
+        USE pds_project;
+        SELECT id, state_type FROM scrim;
+
+    ```
 

@@ -59,7 +59,7 @@ public class ScrimController {
 
     public ResponseWrapper searchScrim(SearchRequest request) {
         try {
-            List<ScrimDTO> response = scrimService.searchScrim(request);
+            List<ScrimDTO> response = scrimService.searchScrims(request);
             return buildResponse("Scrim search successful", HttpStatus.OK, true, response);
         } catch (Exception e) {
             return handleError(e);

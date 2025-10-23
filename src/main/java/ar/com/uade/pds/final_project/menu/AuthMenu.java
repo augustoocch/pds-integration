@@ -29,6 +29,7 @@ public class AuthMenu {
             System.out.println("1. Registrar usuario");
             System.out.println("2. Iniciar sesión");
             System.out.println("3. Validar email con token");
+            System.out.println("4. Cerrar sesión");
             System.out.println("0. Volver al menú principal");
             System.out.print("Selecciona una opción: ");
 
@@ -37,6 +38,7 @@ public class AuthMenu {
                 case "1" -> handleRegister(scanner);
                 case "2" -> handleAuthenticate(scanner);
                 case "3" -> handleVerifyEmail(scanner);
+                case "4" -> handleLogout();
                 case "0" -> back = true;
                 default ->System.out.println("Opción inválida.");
             }
@@ -50,11 +52,14 @@ public class AuthMenu {
         String username = scanner.nextLine();
         System.out.print("Password: ");
         String password = scanner.nextLine();
+        System.out.print("Region (LATAM, US, EU, ASIA): ");
+        String region = scanner.nextLine();
 
         RegisterRequest request = RegisterRequest.builder()
                 .email(email)
                 .username(username)
                 .password(password)
+                .region(region)
                 .build();
 
         ResponseWrapper response = controller.register(request);
@@ -90,5 +95,10 @@ public class AuthMenu {
         EmailVerificationRequest request = new EmailVerificationRequest(email, token);
         ResponseWrapper response = controller.validateToken(request);
         System.out.println(response.getMessage());
+    }
+
+    private void handleLogout() {
+        controller.logout();
+        System.out.println("Sesión cerrada exitosamente.");
     }
 }

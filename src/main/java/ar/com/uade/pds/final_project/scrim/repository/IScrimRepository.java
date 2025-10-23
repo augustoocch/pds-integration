@@ -1,5 +1,6 @@
 package ar.com.uade.pds.final_project.scrim.repository;
 
+import ar.com.uade.pds.final_project.scrim.business.game.state.ScrimStateType;
 import ar.com.uade.pds.final_project.scrim.entity.Scrim;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -18,6 +19,6 @@ public interface IScrimRepository extends JpaRepository<Scrim, Long> {
                               @Param("format") String format);
 
 
-    List<Scrim> findFirstByStateType(String stateType);
+    List<Scrim> findAllByStateType(ScrimStateType stateType);
 }
 

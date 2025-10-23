@@ -1,12 +1,15 @@
 package ar.com.uade.pds.final_project.scrim.entity;
 
+import ar.com.uade.pds.final_project.scrim.business.game.state.Confirmed;
 import ar.com.uade.pds.final_project.scrim.business.game.state.ScrimState;
 import ar.com.uade.pds.final_project.scrim.business.game.state.ScrimStateType;
 import ar.com.uade.pds.final_project.scrim.business.game.state.Searching;
+import ar.com.uade.pds.final_project.scrim.exception.ScrimException;
 import ar.com.uade.pds.final_project.users.entity.Role;
 import ar.com.uade.pds.final_project.users.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.HashSet;
@@ -17,6 +20,7 @@ import java.util.Set;
 @Table(name = "scrim")
 @Getter
 @Setter
+@NoArgsConstructor
 public class Scrim {
 
     @Id
@@ -51,6 +55,10 @@ public class Scrim {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private Set<User> participants = new HashSet<>();
+    @ElementCollection
+    @CollectionTable(name = "scrim_confirmed_users", joinColumns = @JoinColumn(name = "scrim_id"))
+    @Column(name = "user_id")
+    private Set<Long> confirmedUsers = new HashSet<>();
 
     // Constructor privado para Builder
     private Scrim(Builder builder) {
@@ -106,13 +114,34 @@ public class Scrim {
         this.stateType = ScrimStateType.fromClass(newState.getClass());
     }
 
-    public void start() { this.state.start(this); }
-    public void cancel() { this.state.cancel(this); }
-    public void confirm() { this.state.confirm(this); }
-    public void end() { this.state.end(this); }
+    public void start() {
+        this.state.start(this);
+    }
+
+    public void cancel() {
+        this.state.cancel(this);
+    }
+
+    public void confirm(User user) {
+        if (confirmedUsers.contains(user.getId())) {
+            throw new ScrimException("Este usuario ya confirmó");
+        }
+        confirmedUsers.add(user.getId());
+        if (confirmedUsers.containsAll(
+                participants.stream().map(User::getId).toList()
+        )) {
+            this.stateType = ScrimStateType.CONFIRMED;
+            this.state = new Confirmed(this);
+            System.out.println("Todos los usuarios confirmaron. Scrim confirmado!! -- A jugar!!");
+        }
+    }
+
+    public void end() {
+        this.state.end(this);
+    }
 
     public boolean hasValidStateToJoin() {
-        return this.state instanceof Searching;
+        return this.stateType == ScrimStateType.SEARCHING;
     }
 
     public boolean isFull() { return participants.size() >= players; }

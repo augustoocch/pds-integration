@@ -14,6 +14,7 @@ public class SessionContext {
     private String username;
 
     public boolean isAuthenticated() {
+        log.info("Verificando si la sesion esta autenticada: {}, {}", username, email);
         return token != null;
     }
 

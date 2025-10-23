@@ -55,6 +55,15 @@ CREATE TABLE IF NOT EXISTS scrim (
     state_type VARCHAR(50)
 );
 
+-- Tabla intermedia generada por @ElementCollection
+CREATE TABLE IF NOT EXISTS scrim_confirmed_users (
+    scrim_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    PRIMARY KEY (scrim_id, user_id),
+    CONSTRAINT fk_scrim FOREIGN KEY (scrim_id) REFERENCES scrim(id),
+    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
 CREATE TABLE scrim_roles (
     scrim_id BIGINT NOT NULL,
     role VARCHAR(50) NOT NULL,

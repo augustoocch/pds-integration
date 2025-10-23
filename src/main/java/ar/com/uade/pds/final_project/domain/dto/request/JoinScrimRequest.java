@@ -9,5 +9,4 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class JoinScrimRequest {
     private Long idScrim;
-    private Long userId;
 }
