@@ -10,7 +10,7 @@ public enum ErrorDescription {
     USER_ALREADY_IN_SCRIM("User is already participating in this scrim"),
     RANGE_MATCHMAKING_ERROR("No suitable scrim found for MMR range"),
     LATENCY_MATCHMAKING_ERROR("No suitable scrim found for latency"),
-    LATENCY_NOT_SET("User latency not set");
+    NO_COMPATIBLE_SCRIM_FOUND("No compatible scrim found for the given criteria");
 
     private final String description;
 

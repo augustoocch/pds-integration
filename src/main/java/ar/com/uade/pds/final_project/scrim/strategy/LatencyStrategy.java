@@ -1,5 +1,7 @@
 package ar.com.uade.pds.final_project.scrim.strategy;
 
+import static ar.com.uade.pds.final_project.scrim.constants.ErrorDescription.*;
+
 import ar.com.uade.pds.final_project.domain.dto.request.JoinScrimRequest;
 import ar.com.uade.pds.final_project.domain.dto.request.MatchmakingRequest;
 import ar.com.uade.pds.final_project.scrim.business.game.state.ScrimStateType;
@@ -12,12 +14,8 @@ import ar.com.uade.pds.final_project.users.exception.UsersException;
 import ar.com.uade.pds.final_project.users.service.DataService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-
 import java.util.Comparator;
 import java.util.List;
-
-import static ar.com.uade.pds.final_project.scrim.constants.ErrorDescription.*;
-
 
 @AllArgsConstructor
 public class LatencyStrategy implements MatchMakingStrategy {

@@ -1,5 +1,8 @@
 package ar.com.uade.pds.final_project.scrim.strategy;
 
+
+import static ar.com.uade.pds.final_project.scrim.constants.ErrorDescription.RANGE_MATCHMAKING_ERROR;
+
 import ar.com.uade.pds.final_project.domain.dto.request.JoinScrimRequest;
 import ar.com.uade.pds.final_project.domain.dto.request.MatchmakingRequest;
 import ar.com.uade.pds.final_project.scrim.business.game.state.ScrimStateType;
@@ -10,15 +13,9 @@ import ar.com.uade.pds.final_project.users.entity.User;
 import ar.com.uade.pds.final_project.users.service.DataService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Component;
-
 import java.util.List;
 import java.util.Objects;
 
-import static ar.com.uade.pds.final_project.scrim.constants.ErrorDescription.RANGE_MATCHMAKING_ERROR;
-
-
-@Component
 @AllArgsConstructor
 public class RangeStrategy implements MatchMakingStrategy {
 

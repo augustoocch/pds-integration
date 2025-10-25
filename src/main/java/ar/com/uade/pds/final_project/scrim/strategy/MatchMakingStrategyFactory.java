@@ -1,10 +1,8 @@
 package ar.com.uade.pds.final_project.scrim.strategy;
 
-import ar.com.uade.pds.final_project.domain.dto.request.JoinScrimRequest;
 import ar.com.uade.pds.final_project.domain.dto.request.MatchmakingRequest;
 import ar.com.uade.pds.final_project.scrim.service.ScrimService;
 import ar.com.uade.pds.final_project.users.service.DataService;
-
 import java.util.Map;
 
 public class MatchMakingStrategyFactory {

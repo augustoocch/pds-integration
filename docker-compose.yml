@@ -9,7 +9,7 @@ services:
     ports:
       - "3308:3306"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - mysql_data_new:/var/lib/mysql
       - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
     command:
       - --default-authentication-plugin=mysql_native_password
@@ -19,7 +19,7 @@ services:
       - project-network
 
 volumes:
-  mysql_data:
+  mysql_data_new:
 
 networks:
   project-network:

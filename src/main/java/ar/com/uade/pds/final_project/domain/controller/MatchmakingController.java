@@ -9,10 +9,12 @@ import ar.com.uade.pds.final_project.scrim.service.MatchMakingService;
 import ar.com.uade.pds.final_project.scrim.service.ScrimService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Controller;
 
 import static ar.com.uade.pds.final_project.domain.controller.handler.ResponseHandler.buildResponse;
 import static ar.com.uade.pds.final_project.domain.controller.handler.ResponseHandler.handleError;
 
+@Controller
 @AllArgsConstructor
 public class MatchmakingController {
     private final MatchMakingService matchMakingService;

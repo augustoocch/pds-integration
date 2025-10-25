@@ -1,5 +1,7 @@
 package ar.com.uade.pds.final_project.scrim.strategy;
 
+import static ar.com.uade.pds.final_project.scrim.constants.ErrorDescription.NO_COMPATIBLE_SCRIM_FOUND;
+
 import ar.com.uade.pds.final_project.domain.dto.request.JoinScrimRequest;
 import ar.com.uade.pds.final_project.domain.dto.request.MatchmakingRequest;
 import ar.com.uade.pds.final_project.scrim.business.game.state.ScrimStateType;
@@ -12,7 +14,6 @@ import ar.com.uade.pds.final_project.users.exception.UsersException;
 import ar.com.uade.pds.final_project.users.service.DataService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -38,7 +39,7 @@ public class CompatibilityStrategy implements MatchMakingStrategy {
 
         Scrim compatibleScrim = availableScrims.stream()
                 .max(Comparator.comparingDouble(scrim -> calculateCompatibilityScore(currentUser, scrim)))
-                .orElseThrow(() -> new MatchmakingException("No compatible scrim found"));
+                .orElseThrow(() -> new MatchmakingException(NO_COMPATIBLE_SCRIM_FOUND.getDescription()));
 
         scrimService.joinQueue(new JoinScrimRequest(compatibleScrim.getId()));
     }

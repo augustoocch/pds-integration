@@ -48,13 +48,24 @@ https://github.com/user-attachments/assets/8aa4be68-4031-4d11-a867-111fd6024b07
 ### Matar el docker y el volumen
 
     ``` 
-        docker-compose down -v
+    docker compose down -v
+    docker volume prune -f
     ``` 
 ### Ingresar al docker mysql
 
     ``` 
         docker exec -it project-mysql mysql -u root -p
     ```
+
+
+- Show tables
+
+   ``` 
+       USE pds_project;
+       SHOW TABLES;
+
+   ```
+
 
  - Select luego de login
 
