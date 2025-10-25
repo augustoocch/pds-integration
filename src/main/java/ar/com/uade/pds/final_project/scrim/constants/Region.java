@@ -21,18 +21,13 @@ public enum Region {
         return DEFAULT;
     }
 
-    public static String latencyByRegion(Region region) {
-        switch (region) {
-            case LATAM:
-                return "100";
-            case US:
-                return "80";
-            case EU:
-                return "70";
-            case ASIA:
-                return "150";
-            default:
-                return "120";
-        }
+    public static Integer latencyByRegion(Region region) {
+        return switch (region) {
+            case LATAM -> 100;
+            case US -> 80;
+            case EU -> 70;
+            case ASIA -> 150;
+            default -> 120;
+        };
     }
 }

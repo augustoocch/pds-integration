@@ -9,12 +9,15 @@ import ar.com.uade.pds.final_project.scrim.constants.Region;
 import ar.com.uade.pds.final_project.security.ISecurityValidator;
 import ar.com.uade.pds.final_project.users.Business.SessionContext;
 import ar.com.uade.pds.final_project.users.constants.UsersErrorDetails;
+import ar.com.uade.pds.final_project.users.entity.Role;
 import ar.com.uade.pds.final_project.users.entity.User;
 import ar.com.uade.pds.final_project.users.exception.UsersException;
 import ar.com.uade.pds.final_project.users.repository.IUserRepository;
 import ar.com.uade.pds.final_project.users.service.AuthService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 
 @Slf4j
 @AllArgsConstructor
@@ -45,11 +48,19 @@ public class AuthServiceImpl implements AuthService {
         String hashedPassword = securityValidator.hashPassword(request.getPassword());
 
         Region region = Region.fromValue(request.getRegion());
+        Role preferredRole = request.getPreferredRole() != null
+                ? Role.fromString(request.getPreferredRole())
+                : Role.UNASSIGNED;
+
+        int initialMmr = 1000;
         User user = new User.Builder()
                 .email(request.getEmail())
                 .username(request.getUsername())
                 .passwordHash(hashedPassword)
                 .region(region.name())
+                .latency(Region.latencyByRegion(region))
+                .mmr(initialMmr)
+                .preferredRoles(List.of(preferredRole))
                 .emailVerified(false)
                 .build();
 

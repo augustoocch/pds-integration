@@ -13,7 +13,7 @@ public class ScrimDTO {
     private int players;
     private List<String> roles;
     private String region;
-    private String latency;
+    private Integer latency;
     private int estDuration;
     private String mode;
     private String state;
@@ -40,7 +40,7 @@ public class ScrimDTO {
         private int players;
         private List<String> roles;
         private String region;
-        private String latency;
+        private Integer latency;
         private int estDuration;
         private String mode;
         private String state;
@@ -75,7 +75,7 @@ public class ScrimDTO {
             return this;
         }
 
-        public Builder latency(String latency) {
+        public Builder latency(Integer latency) {
             this.latency = latency;
             return this;
         }

@@ -37,7 +37,7 @@ public class Scrim {
     private List<Role> roles;
 
     private String region;
-    private String latency;
+    private int latency;
     @Column(name = "est_duration")
     private int estDuration;
     private String mode;
@@ -59,6 +59,8 @@ public class Scrim {
     @CollectionTable(name = "scrim_confirmed_users", joinColumns = @JoinColumn(name = "scrim_id"))
     @Column(name = "user_id")
     private Set<Long> confirmedUsers = new HashSet<>();
+    private Integer mmrMin;
+    private Integer mmrMax;
 
     // Constructor privado para Builder
     private Scrim(Builder builder) {
@@ -84,12 +86,14 @@ public class Scrim {
         private int players;
         private List<Role> roles;
         private String region;
-        private String latency;
+        private Integer latency;
         private int estDuration;
         private String mode;
         private ScrimState state;
         private ScrimStateType stateType;
         private Set<User> participants;
+        private Integer mmrMin;
+        private Integer mmrMax;
 
         public Builder id(Long id) { this.id = id; return this; }
         public Builder game(String game) { this.game = game; return this; }
@@ -97,12 +101,14 @@ public class Scrim {
         public Builder players(int players) { this.players = players; return this; }
         public Builder roles(List<Role> roles) { this.roles = roles; return this; }
         public Builder region(String region) { this.region = region; return this; }
-        public Builder latency(String latency) { this.latency = latency; return this; }
+        public Builder latency(Integer latency) { this.latency = latency; return this; }
         public Builder estDuration(int estDuration) { this.estDuration = estDuration; return this; }
         public Builder mode(String modal) { this.mode = modal; return this; }
         public Builder state(ScrimState state) { this.state = state; return this; }
         public Builder stateType(ScrimStateType stateType) { this.stateType = stateType; return this; }
         public Builder participants(Set<User> participants) { this.participants = participants; return this; }
+        public Builder mmrMin(Integer mmrMin) { this.mmrMin = mmrMin; return this; }
+        public Builder mmrMax(Integer mmrMax) { this.mmrMax = mmrMax; return this; }
 
         public Scrim build() {
             return new Scrim(this);

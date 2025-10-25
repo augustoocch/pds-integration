@@ -4,7 +4,6 @@ import ar.com.uade.pds.final_project.domain.dto.request.*;
 import ar.com.uade.pds.final_project.domain.dto.response.ScrimDTO;
 import ar.com.uade.pds.final_project.domain.dto.response.UserDTO;
 import ar.com.uade.pds.final_project.domain.dto.response.ValidationDTOResponse;
-import ar.com.uade.pds.final_project.scrim.business.game.state.Lobby;
 import ar.com.uade.pds.final_project.scrim.business.game.format.GameFormat;
 import ar.com.uade.pds.final_project.scrim.constants.ErrorDescription;
 import ar.com.uade.pds.final_project.scrim.constants.Region;
@@ -196,6 +195,15 @@ public class ScrimServiceImpl implements ScrimService {
                         .state(s.getStateType().name())
                         .build()
                 ).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Scrim> findAllByStateType(ScrimStateType stateType) {
+        try {
+            return scrimRepository.findAllByStateType(stateType);
+        } catch (IllegalArgumentException e) {
+            throw new ScrimException(ErrorDescription.INVALID_SCRIM_STATE.getDescription());
+        }
     }
 
     private void validateJoinableScrim(Scrim scrim, Long userId) {

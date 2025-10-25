@@ -44,6 +44,9 @@ public class User {
 
     @Column(nullable = false, name = "email_verified")
     private boolean emailVerified;
+    private String rank;
+    private Integer mmr;
+    private int latency;
 
     // Constructor privado para el Builder
     private User(Builder builder) {
@@ -56,6 +59,9 @@ public class User {
         this.region = builder.region;
         this.preference = builder.preference;
         this.emailVerified = builder.emailVerified;
+        this.rank = builder.rank;
+        this.mmr = builder.mmr;
+        this.latency = builder.latency;
     }
 
     // Builder manual
@@ -69,6 +75,9 @@ public class User {
         private String region;
         private String preference;
         private boolean emailVerified = false;
+        private String rank;
+        private Integer mmr;
+        private int latency;
 
         public Builder id(Long id) { this.id = id; return this; }
         public Builder username(String username) { this.username = username; return this; }
@@ -79,6 +88,9 @@ public class User {
         public Builder region(String region) { this.region = region; return this; }
         public Builder preference(String preference) { this.preference = preference; return this; }
         public Builder emailVerified(boolean emailVerified) { this.emailVerified = emailVerified; return this; }
+        public Builder rank(String rank) { this.rank = rank; return this; }
+        public Builder mmr(Integer mmr) { this.mmr = mmr; return this; }
+        public Builder latency(int latency) { this.latency = latency; return this; }
 
         public User build() {
             return new User(this);

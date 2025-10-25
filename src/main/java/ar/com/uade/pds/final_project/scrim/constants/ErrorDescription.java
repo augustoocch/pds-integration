@@ -7,7 +7,10 @@ public enum ErrorDescription {
     SCRIM_FULL("Scrim is full"),
     INVALID_SCRIM_STATE("Invalid scrim state for this operation"),
     SCRIM_CANNOT_CHANGE_STATE("Scrim cannot be ended in its current state"),
-    USER_ALREADY_IN_SCRIM("User is already participating in this scrim");
+    USER_ALREADY_IN_SCRIM("User is already participating in this scrim"),
+    RANGE_MATCHMAKING_ERROR("No suitable scrim found for MMR range"),
+    LATENCY_MATCHMAKING_ERROR("No suitable scrim found for latency"),
+    LATENCY_NOT_SET("User latency not set");
 
     private final String description;
 

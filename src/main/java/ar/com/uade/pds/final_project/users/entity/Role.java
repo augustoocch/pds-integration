@@ -1,7 +1,10 @@
 package ar.com.uade.pds.final_project.users.entity;
 
+import lombok.Getter;
+
 import java.util.List;
 
+@Getter
 public enum Role {
     SNIPER("sniper"),
     SUPPORT("support"),
@@ -9,7 +12,8 @@ public enum Role {
     WARRIOR("warrior"),
     ASSASSIN("assassin"),
     MAGE("mage"),
-    MARKSMAN("marksman");
+    MARKSMAN("marksman"),
+    UNASSIGNED("unassigned");
 
     private final String description;
 
@@ -17,8 +21,13 @@ public enum Role {
         this.description = description;
     }
 
-    public String getDescription() {
-        return description;
+    public static Role fromString(String roleStr) {
+        for (Role role : Role.values()) {
+            if (role.description.equalsIgnoreCase(roleStr)) {
+                return role;
+            }
+        }
+        return UNASSIGNED;
     }
 
     public static List<Role> oneVsOneRoles() {
