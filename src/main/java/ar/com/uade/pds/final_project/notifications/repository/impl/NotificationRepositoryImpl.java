@@ -12,7 +12,6 @@ public class NotificationRepositoryImpl implements NotificationRepository {
 
     @Override
     public List<SubscriberData> findSubscribers(DomainEvent event) {
-        // TODO: reemplazar con lógica real desde la base de datos
         List<SubscriberData> list = new ArrayList<>();
         list.add(new SubscriberData(event.getUserId(), "usuario@correo.com", "EMAIL", event.getEventType().name()));
         return list;
