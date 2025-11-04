@@ -13,7 +13,8 @@ public interface IScrimRepository extends JpaRepository<Scrim, Long> {
     @Query("SELECT s FROM Scrim s WHERE " +
             "(:game IS NULL OR s.game = :game) AND " +
             "(:region IS NULL OR s.region = :region) AND " +
-            "(:format IS NULL OR s.format = :format)")
+            "(:format IS NULL OR s.format = :format) AND " +
+            "s.stateType = 'SEARCHING'")
     List<Scrim> findByFilters(@Param("game") String game,
                               @Param("region") String region,
                               @Param("format") String format);

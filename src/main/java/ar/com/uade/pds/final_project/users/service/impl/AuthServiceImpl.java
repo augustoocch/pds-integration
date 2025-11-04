@@ -5,9 +5,12 @@ import ar.com.uade.pds.final_project.domain.dto.request.EmailVerificationRequest
 import ar.com.uade.pds.final_project.domain.dto.request.RegisterRequest;
 import ar.com.uade.pds.final_project.domain.dto.response.AuthenticationDTOResponse;
 import ar.com.uade.pds.final_project.domain.dto.response.ValidationDTOResponse;
+import ar.com.uade.pds.final_project.notifications.event.NotificationType;
+import ar.com.uade.pds.final_project.notifications.event.SubscribeRequest;
+import ar.com.uade.pds.final_project.notifications.service.NotificationService;
 import ar.com.uade.pds.final_project.scrim.constants.Region;
 import ar.com.uade.pds.final_project.security.ISecurityValidator;
-import ar.com.uade.pds.final_project.users.Business.SessionContext;
+import ar.com.uade.pds.final_project.users.business.SessionContext;
 import ar.com.uade.pds.final_project.users.constants.UsersErrorDetails;
 import ar.com.uade.pds.final_project.users.entity.Role;
 import ar.com.uade.pds.final_project.users.entity.User;
@@ -25,7 +28,7 @@ public class AuthServiceImpl implements AuthService {
 
     private final IUserRepository userRepository;
     private final ISecurityValidator securityValidator;
-    private final SessionContext sessionContext;
+    private final NotificationService notificationService;
 
     @Override
     public AuthenticationDTOResponse authenticate(AuthenticationRequest request) {
@@ -38,7 +41,7 @@ public class AuthServiceImpl implements AuthService {
             throw new UsersException(UsersErrorDetails.INVALID_CREDENTIALS.getMessage());
         }
         String token = securityValidator.generateToken(user);
-        sessionContext.setSession(user.getEmail(), user.getUsername(), token);
+        SessionContext.getInstance().setSession(user.getEmail(), user.getUsername(), token);
         return new AuthenticationDTOResponse(token, user.getUsername(), user.getEmail());
     }
 
@@ -64,8 +67,19 @@ public class AuthServiceImpl implements AuthService {
                 .emailVerified(false)
                 .build();
 
+        User savedUsr = userRepository.save(user);
+        NotificationType notificationType = request.getPreferredNotificationChannel() != null
+                ? NotificationType.fromString(request.getPreferredNotificationChannel())
+                : NotificationType.EMAIL;
+
+        notificationService.subscribe(
+                SubscribeRequest.builder()
+                        .userId(savedUsr.getId())
+                        .address(user.getEmail())
+                        .channel(notificationType)
+                        .build());
+
         String registerToken = securityValidator.generateToken(user);
-        userRepository.save(user);
         return new ValidationDTOResponse(true, registerToken);
     }
 
@@ -84,7 +98,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void logout() {
-        sessionContext.clearSession();
+        SessionContext.getInstance().clearSession();
     }
 
     private void validateRegisterRequest(RegisterRequest request) {

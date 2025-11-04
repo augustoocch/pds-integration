@@ -1,29 +1,55 @@
 package ar.com.uade.pds.final_project.notifications.service.impl;
 
 import ar.com.uade.pds.final_project.notifications.event.DomainEvent;
+import ar.com.uade.pds.final_project.notifications.event.SubscribeRequest;
+import ar.com.uade.pds.final_project.notifications.exception.NotificationException;
+import ar.com.uade.pds.final_project.notifications.model.Subscriber;
 import ar.com.uade.pds.final_project.notifications.repository.NotificationRepository;
 import ar.com.uade.pds.final_project.notifications.service.NotificationService;
-import lombok.AllArgsConstructor;
+import ar.com.uade.pds.final_project.scrim.constants.ErrorDescription;
+import ar.com.uade.pds.final_project.users.entity.User;
+import ar.com.uade.pds.final_project.users.service.DataService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
-    private NotificationRepository notificationRepository;
-    private NotificationManager notificationManager;
+
+    private final DataService dataService;
+    private final NotificationRepository notificationRepository;
+    private final NotificationManager notificationManager;
 
     @Override
-    public void subscribe(DomainEvent event) {
-        notificationRepository.createSubscriber(event);
+    public void subscribe(SubscribeRequest request) {
+        Subscriber subscriber = Subscriber.builder()
+                .userId(request.getUserId())
+                .address(request.getAddress())
+                .channel(request.getChannel())
+                .build();
+        notificationRepository.save(subscriber);
     }
 
     @Override
-    public void notify(DomainEvent event) {
+    public void process(DomainEvent event) {
         notificationManager.processEvent(event);
     }
 
     @Override
-    public void unsubscribe(DomainEvent event) {
-        notificationRepository.unsubscribe(event.getUserId(), event);
+    public void unsubscribe() {
+        User currentUser = dataService.findUserWithToken();
+        if(currentUser == null) {
+            throw new NotificationException(ErrorDescription.USER_NOT_FOUND.getDescription());
+        }
+        List<Subscriber> subs = notificationRepository.findByUserId(currentUser.getId())
+                .stream()
+                .toList();
+
+        if(subs.isEmpty()) {
+            throw new NotificationException("No subscriptions found for user with ID: " + currentUser.getId());
+        }
+        notificationRepository.deleteAll(subs);
     }
 }

@@ -1,44 +1,25 @@
 package ar.com.uade.pds.final_project.domain.controller;
 
-
-import ar.com.uade.pds.final_project.domain.dto.request.NotificationRequest;
-import ar.com.uade.pds.final_project.notifications.event.DomainEvent;
+import ar.com.uade.pds.final_project.domain.dto.response.ResponseWrapper;
 import ar.com.uade.pds.final_project.notifications.service.NotificationService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Controller;
 
-@RestController
-@RequestMapping("/api/notifications")
+import static ar.com.uade.pds.final_project.domain.controller.handler.ResponseHandler.buildResponse;
+import static ar.com.uade.pds.final_project.domain.controller.handler.ResponseHandler.handleError;
+
+@Controller
+@AllArgsConstructor
 public class NotificationController {
+    private final NotificationService notificationService;
 
-    @Autowired
-    private NotificationService notificationService;
-
-    @PostMapping("/subscribe")
-    public ResponseEntity<?> subscribe(@RequestBody NotificationRequest request) {
-        DomainEvent event = new DomainEvent(
-                request.getEventType(),
-                request.getNotificationType(),
-                request.getUserId(),
-                request.getScrimId()
-        );
-        notificationService.subscribe(event);
-        return ResponseEntity.ok("Usuario suscripto correctamente");
-    }
-
-    @PostMapping("/notify")
-    public ResponseEntity<?> notifyEvent(@RequestBody NotificationRequest request) {
-        DomainEvent event = new DomainEvent(
-                request.getEventType(),
-                request.getNotificationType(),
-                request.getUserId(),
-                request.getScrimId()
-        );
-        notificationService.notify(event);
-        return ResponseEntity.ok("Notificaciones enviadas");
+    public ResponseWrapper unsubscribeNotifications() {
+        try {
+            notificationService.unsubscribe();
+            return buildResponse("Joining success", HttpStatus.OK, true, null);
+        } catch (Exception e) {
+            return handleError(e);
+        }
     }
 }

@@ -2,10 +2,11 @@ package ar.com.uade.pds.final_project.domain.config;
 
 
 import ar.com.uade.pds.final_project.notifications.repository.NotificationRepository;
-import ar.com.uade.pds.final_project.notifications.repository.impl.NotificationRepositoryImpl;
+import ar.com.uade.pds.final_project.notifications.service.NotificationFactory;
 import ar.com.uade.pds.final_project.notifications.service.NotificationService;
 import ar.com.uade.pds.final_project.notifications.service.impl.NotificationManager;
 import ar.com.uade.pds.final_project.notifications.service.impl.NotificationServiceImpl;
+import ar.com.uade.pds.final_project.users.service.DataService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,13 +14,24 @@ import org.springframework.context.annotation.Configuration;
 public class NotificationsConfig {
 
     @Bean
-    public NotificationRepository notificationRepository() {
-        return new NotificationRepositoryImpl();
+    public NotificationFactory notificationFactory() {
+        return new NotificationFactory();
     }
 
     @Bean
-    public NotificationService notificationService(NotificationRepository notificationRepository,
-                                           NotificationManager notificationManager) {
-        return new NotificationServiceImpl(notificationRepository, notificationManager);
+    public NotificationManager notificationManager(
+            NotificationRepository notificationRepository,
+            NotificationFactory notificationFactory) {
+        return new NotificationManager(notificationRepository, notificationFactory);
+    }
+
+
+    @Bean
+    public NotificationService notificationService(
+            DataService dataService,
+            NotificationRepository notificationRepository,
+            NotificationManager notificationManager) {
+        return new NotificationServiceImpl(dataService,
+                notificationRepository, notificationManager);
     }
 }

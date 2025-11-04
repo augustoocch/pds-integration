@@ -1,9 +1,11 @@
 package ar.com.uade.pds.final_project;
 
 import ar.com.uade.pds.final_project.domain.controller.AuthController;
+import ar.com.uade.pds.final_project.domain.controller.NotificationController;
 import ar.com.uade.pds.final_project.domain.controller.ScrimController;
 import ar.com.uade.pds.final_project.domain.dto.request.*;
 import ar.com.uade.pds.final_project.menu.AuthMenu;
+import ar.com.uade.pds.final_project.menu.NotificationsMenu;
 import ar.com.uade.pds.final_project.menu.ScrimMenu;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -20,9 +22,11 @@ public class FinalProjectApplication {
 
         AuthController authController = context.getBean(AuthController.class);
         ScrimController scrimController = context.getBean(ScrimController.class);
+        NotificationController notificationController = context.getBean(NotificationController.class);
 
         AuthMenu authMenu = new AuthMenu(authController);
         ScrimMenu scrimMenu = new ScrimMenu(scrimController);
+        NotificationsMenu notificationsMenu = new NotificationsMenu(notificationController);
 
         Scanner scanner = new Scanner(System.in);
         boolean running = true;
@@ -31,6 +35,7 @@ public class FinalProjectApplication {
             System.out.println("\n=== MENU PRINCIPAL ===");
             System.out.println("1. Autenticación");
             System.out.println("2. Scrims");
+            System.out.println("3. Notificaciones");
             System.out.println("0. Salir");
             System.out.print("Selecciona una opción: ");
 
@@ -38,6 +43,7 @@ public class FinalProjectApplication {
             switch (choice) {
                 case "1" -> authMenu.show(scanner);
                 case "2" -> scrimMenu.show(scanner);
+                case "3" -> notificationsMenu.show(scanner);
                 case "0" -> {
                     running = false;
                     System.out.println("Saliendo de la aplicación...");

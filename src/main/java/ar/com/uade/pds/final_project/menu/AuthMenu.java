@@ -54,12 +54,15 @@ public class AuthMenu {
         String password = scanner.nextLine();
         System.out.print("Region (LATAM, US, EU, ASIA): ");
         String region = scanner.nextLine();
+        System.out.print("Medio de notificación preferido (DISCORD, EMAIL, PUSH):");
+        String notificationType = scanner.nextLine();
 
         RegisterRequest request = RegisterRequest.builder()
                 .email(email)
                 .username(username)
                 .password(password)
                 .region(region)
+                .preferredNotificationChannel(notificationType)
                 .build();
 
         ResponseWrapper response = controller.register(request);

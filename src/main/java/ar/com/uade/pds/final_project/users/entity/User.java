@@ -44,7 +44,7 @@ public class User {
 
     @Column(nullable = false, name = "email_verified")
     private boolean emailVerified;
-    private String rank;
+    private String userRank;
     private Integer mmr;
     private int latency;
 
@@ -59,7 +59,7 @@ public class User {
         this.region = builder.region;
         this.preference = builder.preference;
         this.emailVerified = builder.emailVerified;
-        this.rank = builder.rank;
+        this.userRank = builder.userRank;
         this.mmr = builder.mmr;
         this.latency = builder.latency;
     }
@@ -75,7 +75,7 @@ public class User {
         private String region;
         private String preference;
         private boolean emailVerified = false;
-        private String rank;
+        private String userRank;
         private Integer mmr;
         private int latency;
 
@@ -88,7 +88,7 @@ public class User {
         public Builder region(String region) { this.region = region; return this; }
         public Builder preference(String preference) { this.preference = preference; return this; }
         public Builder emailVerified(boolean emailVerified) { this.emailVerified = emailVerified; return this; }
-        public Builder rank(String rank) { this.rank = rank; return this; }
+        public Builder userRank(String userRank) { this.userRank = userRank; return this; }
         public Builder mmr(Integer mmr) { this.mmr = mmr; return this; }
         public Builder latency(int latency) { this.latency = latency; return this; }
 

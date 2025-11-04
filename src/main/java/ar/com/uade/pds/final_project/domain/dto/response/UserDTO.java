@@ -7,12 +7,13 @@ import java.util.List;
 
 @Getter
 public class UserDTO {
-    private Long id;
-    private String username;
-    private String email;
-    private List<Role> preferredRoles;
-    private String region;
-    private String preference;
+    private final Long id;
+    private final String username;
+    private final String email;
+    private final List<Role> preferredRoles;
+    private final String region;
+    private final String preference;
+    private final int mmr;
 
     // Constructor privado para Builder
     private UserDTO(Builder builder) {
@@ -22,6 +23,7 @@ public class UserDTO {
         this.preferredRoles = builder.preferredRoles;
         this.region = builder.region;
         this.preference = builder.preference;
+        this.mmr = builder.mmr;
     }
 
     // Builder manual
@@ -32,6 +34,7 @@ public class UserDTO {
         private List<Role> preferredRoles;
         private String region;
         private String preference;
+        private int mmr;
 
         public Builder id(Long id) { this.id = id; return this; }
         public Builder username(String username) { this.username = username; return this; }
@@ -39,6 +42,7 @@ public class UserDTO {
         public Builder preferredRoles(List<Role> preferredRoles) { this.preferredRoles = preferredRoles; return this; }
         public Builder region(String region) { this.region = region; return this; }
         public Builder preference(String preference) { this.preference = preference; return this; }
+        public Builder mmr(int mmr) { this.mmr = mmr; return this; }
 
         public UserDTO build() {
             return new UserDTO(this);

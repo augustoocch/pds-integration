@@ -1,5 +1,6 @@
 package ar.com.uade.pds.final_project.domain.config;
 
+import ar.com.uade.pds.final_project.notifications.service.NotificationService;
 import ar.com.uade.pds.final_project.scrim.repository.IScrimRepository;
 import ar.com.uade.pds.final_project.scrim.service.MatchMakingService;
 import ar.com.uade.pds.final_project.scrim.service.ScrimService;
@@ -15,8 +16,10 @@ public class ScrimConfig {
 
     @Bean
     public ScrimService scrimService(IScrimRepository iScrimRepository,
-                                      DataService dataService) {
-        return new ScrimServiceImpl(iScrimRepository, dataService);
+                                     DataService dataService,
+                                     NotificationService notificationService
+                                     ) {
+        return new ScrimServiceImpl(iScrimRepository, dataService, notificationService);
     }
 
     @Bean

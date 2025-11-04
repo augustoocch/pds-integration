@@ -53,7 +53,7 @@ public class ScrimMenu {
         String game = scanner.nextLine();
         System.out.print("Formato (1V1, 2V2, 5V5): ");
         String format = scanner.nextLine();
-        System.out.print("Modo de juego (ranked, unranked): ");
+        System.out.print("Modo de juego (ranked, casual): ");
         String mode = scanner.nextLine();
 
         ScrimCreationRequest request = new ScrimCreationRequest(game,

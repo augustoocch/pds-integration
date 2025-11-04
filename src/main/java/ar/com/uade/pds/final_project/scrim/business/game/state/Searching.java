@@ -1,6 +1,7 @@
 package ar.com.uade.pds.final_project.scrim.business.game.state;
 
 import ar.com.uade.pds.final_project.scrim.entity.Scrim;
+import ar.com.uade.pds.final_project.users.entity.User;
 
 public class Searching implements ScrimState {
 
@@ -10,12 +11,12 @@ public class Searching implements ScrimState {
     }
 
     @Override
-    public void cancel(Scrim scrim) {
-        scrim.setState(new Cancelled());
+    public void cancel(Scrim scrim, Long userId) {
+        scrim.setState(new Cancelled(scrim, userId));
     }
 
     @Override
-    public void confirm(Scrim scrim) {
+    public void confirm(Scrim scrim, User user) {
         throw new IllegalStateException("Scrim not in lobby");
     }
 

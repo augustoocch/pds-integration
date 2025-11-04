@@ -1,10 +1,7 @@
 package ar.com.uade.pds.final_project.scrim.entity;
 
-import ar.com.uade.pds.final_project.scrim.business.game.state.Confirmed;
-import ar.com.uade.pds.final_project.scrim.business.game.state.ScrimState;
-import ar.com.uade.pds.final_project.scrim.business.game.state.ScrimStateType;
-import ar.com.uade.pds.final_project.scrim.business.game.state.Searching;
-import ar.com.uade.pds.final_project.scrim.exception.ScrimException;
+import ar.com.uade.pds.final_project.notifications.event.DomainEvent;
+import ar.com.uade.pds.final_project.scrim.business.game.state.*;
 import ar.com.uade.pds.final_project.users.entity.Role;
 import ar.com.uade.pds.final_project.users.entity.User;
 import jakarta.persistence.*;
@@ -12,9 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "scrim")
@@ -29,7 +24,7 @@ public class Scrim {
     private String game;
     private String format;
     private int players;
-
+    private Long idCreator;
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "scrim_roles", joinColumns = @JoinColumn(name = "scrim_id"))
     @Enumerated(EnumType.STRING)
@@ -38,7 +33,6 @@ public class Scrim {
 
     private String region;
     private int latency;
-    @Column(name = "est_duration")
     private int estDuration;
     private String mode;
 
@@ -61,10 +55,13 @@ public class Scrim {
     private Set<Long> confirmedUsers = new HashSet<>();
     private Integer mmrMin;
     private Integer mmrMax;
+    @Transient
+    private final List<DomainEvent> domainEvents = new ArrayList<>();
 
-    // Constructor privado para Builder
+
     private Scrim(Builder builder) {
         this.id = builder.id;
+        this.idCreator = builder.idCreator;
         this.game = builder.game;
         this.format = builder.format;
         this.players = builder.players;
@@ -76,6 +73,8 @@ public class Scrim {
         this.state = builder.state != null ? builder.state : new Searching();
         this.stateType = builder.stateType != null ? builder.stateType : ScrimStateType.SEARCHING;
         this.participants = builder.participants != null ? builder.participants : new HashSet<>();
+        this.mmrMin = builder.mmrMin;
+        this.mmrMax = builder.mmrMax;
     }
 
     // Builder manual
@@ -94,6 +93,7 @@ public class Scrim {
         private Set<User> participants;
         private Integer mmrMin;
         private Integer mmrMax;
+        private Long idCreator;
 
         public Builder id(Long id) { this.id = id; return this; }
         public Builder game(String game) { this.game = game; return this; }
@@ -106,7 +106,7 @@ public class Scrim {
         public Builder mode(String modal) { this.mode = modal; return this; }
         public Builder state(ScrimState state) { this.state = state; return this; }
         public Builder stateType(ScrimStateType stateType) { this.stateType = stateType; return this; }
-        public Builder participants(Set<User> participants) { this.participants = participants; return this; }
+        public Builder idCreator(Long idCreator) { this.idCreator = idCreator; return this; }
         public Builder mmrMin(Integer mmrMin) { this.mmrMin = mmrMin; return this; }
         public Builder mmrMax(Integer mmrMax) { this.mmrMax = mmrMax; return this; }
 
@@ -120,26 +120,12 @@ public class Scrim {
         this.stateType = ScrimStateType.fromClass(newState.getClass());
     }
 
-    public void start() {
-        this.state.start(this);
-    }
-
-    public void cancel() {
-        this.state.cancel(this);
-    }
-
     public void confirm(User user) {
-        if (confirmedUsers.contains(user.getId())) {
-            throw new ScrimException("Este usuario ya confirmó");
-        }
-        confirmedUsers.add(user.getId());
-        if (confirmedUsers.containsAll(
-                participants.stream().map(User::getId).toList()
-        )) {
-            this.stateType = ScrimStateType.CONFIRMED;
-            this.state = new Confirmed(this);
-            System.out.println("Todos los usuarios confirmaron. Scrim confirmado!! -- A jugar!!");
-        }
+        this.state.confirm(this, user);
+    }
+
+    public void cancel(Long userId) {
+        this.state.cancel(this, userId);
     }
 
     public void end() {
@@ -150,7 +136,20 @@ public class Scrim {
         return this.stateType == ScrimStateType.SEARCHING;
     }
 
-    public boolean isFull() { return participants.size() >= players; }
+    public boolean isFull() {
+        return participants.size() >= players;
+    }
 
-    public void addParticipant(User u) { this.participants.add(u); }
+    public void addParticipant(User u) {
+        this.participants.add(u);
+    }
+
+    public void addDomainEvent(DomainEvent event) {
+        this.domainEvents.add(event);
+    }
+
+    public void setCurrentState() {
+        ScrimState state = ScrimStateType.scrimStateFromString(this.stateType);
+        this.setState(state);
+    }
 }

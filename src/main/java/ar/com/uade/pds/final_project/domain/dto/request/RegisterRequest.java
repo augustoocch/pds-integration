@@ -13,4 +13,5 @@ public class RegisterRequest {
     private String password;
     private String region;
     private String preferredRole;
+    private String preferredNotificationChannel;
 }

@@ -1,12 +1,9 @@
 package ar.com.uade.pds.final_project.domain.controller;
 
-import ar.com.uade.pds.final_project.domain.dto.request.JoinScrimRequest;
 import ar.com.uade.pds.final_project.domain.dto.request.MatchmakingRequest;
-import ar.com.uade.pds.final_project.domain.dto.request.ScrimCreationRequest;
 import ar.com.uade.pds.final_project.domain.dto.response.ResponseWrapper;
 import ar.com.uade.pds.final_project.domain.dto.response.ValidationDTOResponse;
 import ar.com.uade.pds.final_project.scrim.service.MatchMakingService;
-import ar.com.uade.pds.final_project.scrim.service.ScrimService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;

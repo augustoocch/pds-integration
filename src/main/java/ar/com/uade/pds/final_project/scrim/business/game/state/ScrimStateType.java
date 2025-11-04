@@ -25,5 +25,13 @@ public enum ScrimStateType {
         return Optional.ofNullable(map.get(clazz))
                 .orElseThrow(() -> new IllegalArgumentException("Unknown state: " + clazz.getSimpleName()));
     }
+
+    public static ScrimState scrimStateFromString(ScrimStateType stateType) {
+        try {
+            return stateType.stateClass.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Cannot create instance of state: " + stateType.name());
+        }
+    }
 }
 

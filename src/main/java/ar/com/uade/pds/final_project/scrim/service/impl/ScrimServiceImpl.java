@@ -4,6 +4,9 @@ import ar.com.uade.pds.final_project.domain.dto.request.*;
 import ar.com.uade.pds.final_project.domain.dto.response.ScrimDTO;
 import ar.com.uade.pds.final_project.domain.dto.response.UserDTO;
 import ar.com.uade.pds.final_project.domain.dto.response.ValidationDTOResponse;
+import ar.com.uade.pds.final_project.notifications.event.DomainEvent;
+import ar.com.uade.pds.final_project.notifications.event.EventType;
+import ar.com.uade.pds.final_project.notifications.service.NotificationService;
 import ar.com.uade.pds.final_project.scrim.business.game.format.GameFormat;
 import ar.com.uade.pds.final_project.scrim.constants.ErrorDescription;
 import ar.com.uade.pds.final_project.scrim.constants.Region;
@@ -34,6 +37,7 @@ public class ScrimServiceImpl implements ScrimService {
 
     private final IScrimRepository scrimRepository;
     private final DataService dataService;
+    private final NotificationService notificationService;
 
     @Override
     public ValidationDTOResponse createScrim(ScrimCreationRequest request) {
@@ -53,6 +57,7 @@ public class ScrimServiceImpl implements ScrimService {
 
         Scrim scrim = new Scrim.Builder()
                 .game(game.getValue())
+                .idCreator(currentUser.getId())
                 .format(gameFormat.getName())
                 .players(playersNumber)
                 .region(currentUser.getRegion())
@@ -60,19 +65,26 @@ public class ScrimServiceImpl implements ScrimService {
                 .estDuration(estimatedDuration)
                 .mode(mode.getValue())
                 .roles(roles)
+                .mmrMin(currentUser.getMmr())
                 .stateType(ScrimStateType.SEARCHING)
                 .state(new Searching())
                 .build();
 
-        scrimRepository.save(scrim);
+        Scrim saved = scrimRepository.save(scrim);
+        DomainEvent event = getEventForScrimCreation(saved, currentUser.getId());
+        notificationService.process(event);
         return new ValidationDTOResponse(true, null);
     }
 
     @Override
     public ValidationDTOResponse endScrim(Long id) {
+        if(!dataService.checkIsAuthenticated()) {
+            throw new UsersException(UsersErrorDetails.USER_NOT_AUTHENTICATED.getMessage());
+        }
         Scrim scrim = scrimRepository.findById(id)
                 .orElseThrow(() -> new ScrimException(ErrorDescription.SCRIM_NOT_FOUND.getDescription()));
         try {
+            scrim.setCurrentState();
             scrim.end();
             scrimRepository.save(scrim);
             return new ValidationDTOResponse(true, null);
@@ -83,39 +95,40 @@ public class ScrimServiceImpl implements ScrimService {
 
     @Override
     public ValidationDTOResponse cancelScrim(Long id) {
-        Scrim scrim = scrimRepository.findById(id).orElse(null);
-        if (scrim == null) {
-            throw new ScrimException(
-                    ErrorDescription.SCRIM_NOT_FOUND.getDescription()
-            );
+        if(!dataService.checkIsAuthenticated()) {
+            throw new UsersException(UsersErrorDetails.USER_NOT_AUTHENTICATED.getMessage());
         }
-
-        try {
-            scrim.cancel();
-            scrimRepository.save(scrim);
-            return new ValidationDTOResponse(true, null);
-        } catch (Exception e) {
-            throw new ScrimException(
-                    ErrorDescription.SCRIM_CANNOT_CHANGE_STATE.getDescription()
-            );
+        Scrim scrim = scrimRepository.findById(id)
+                .orElseThrow(() -> new ScrimException(ErrorDescription.SCRIM_NOT_FOUND.getDescription()));
+        User currentUser = dataService.findUserWithToken();
+        if(currentUser == null) {
+            throw new ScrimException(ErrorDescription.USER_NOT_FOUND.getDescription());
         }
+        scrim.setCurrentState();
+        scrim.cancel(currentUser.getId());
+        scrimRepository.save(scrim);
+        scrim.getDomainEvents()
+                .forEach(notificationService::process);
+        return new ValidationDTOResponse(true, null);
     }
 
     @Override
     public ValidationDTOResponse confirmScrim(Long id) {
+        if(!dataService.checkIsAuthenticated()) {
+            throw new UsersException(UsersErrorDetails.USER_NOT_AUTHENTICATED.getMessage());
+        }
         Scrim scrim = scrimRepository.findById(id)
                 .orElseThrow(() -> new ScrimException(ErrorDescription.SCRIM_NOT_FOUND.getDescription()));
-        try {
-            User currentUser = dataService.findUserWithToken();
-            if(currentUser == null) {
-                throw new ScrimException(ErrorDescription.USER_NOT_FOUND.getDescription());
-            }
-            scrim.confirm(currentUser);
-            scrimRepository.save(scrim);
-            return new ValidationDTOResponse(true, null);
-        } catch (Exception e) {
-            throw new ScrimException(ErrorDescription.SCRIM_CANNOT_CHANGE_STATE.getDescription());
+        User currentUser = dataService.findUserWithToken();
+        if(currentUser == null) {
+            throw new ScrimException(ErrorDescription.USER_NOT_FOUND.getDescription());
         }
+        scrim.setCurrentState();
+        scrim.confirm(currentUser);
+        scrimRepository.save(scrim);
+        scrim.getDomainEvents()
+                .forEach(notificationService::process);
+        return new ValidationDTOResponse(true, null);
     }
 
     @Override
@@ -223,5 +236,14 @@ public class ScrimServiceImpl implements ScrimService {
                     throw new ScrimException(ErrorDescription.USER_ALREADY_IN_SCRIM
                             .getDescription());
                 });
+    }
+
+    private DomainEvent getEventForScrimCreation(Scrim scrim, Long userId) {
+        return new DomainEvent(
+                EventType.SCRIM_CREATED,
+                userId,
+                List.of(),
+                scrim.getId()
+        );
     }
 }

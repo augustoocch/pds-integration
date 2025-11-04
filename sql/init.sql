@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS users (
     region VARCHAR(255),
     preference VARCHAR(255),
     email_verified BOOLEAN NOT NULL DEFAULT FALSE,
-    `rank` VARCHAR(255),
+    user_rank VARCHAR(255),
     mmr INT,
     latency INT
 );
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS user_roles (
 );
 
 -- Insert sample users
-INSERT IGNORE INTO users (id, username, email, password_hash, range_per_game, region, preference, email_verified, `rank`, mmr, latency) VALUES
+INSERT IGNORE INTO users (id, username, email, password_hash, range_per_game, region, preference, email_verified, user_rank, mmr, latency) VALUES
 (1, 'sniper_pro', 'sniper@example.com', '$2a$10$hashedpassword', '100-200', 'EU', 'Competitive', true, 'Gold', 150, 50),
 (2, 'support_main', 'support@example.com', '$2a$10$hashedpassword', '50-100', 'NA', 'Casual', true, 'Silver', 80, 70),
 (3, 'tank_player', 'tank@example.com', '$2a$10$hashedpassword', '75-150', 'ASIA', 'Ranked', false, 'Bronze', 110, 120),
@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS scrim (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     game VARCHAR(255),
     format VARCHAR(255),
+    id_creator BIGINT,
     players INT,
     region VARCHAR(255),
     latency INT,
@@ -86,11 +87,11 @@ CREATE TABLE IF NOT EXISTS scrim_participants (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Notification subscribers
-CREATE TABLE IF NOT EXISTS notification_subscribers (
+-- Subscribers table for notifications
+CREATE TABLE IF NOT EXISTS subscribers (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL,
     address VARCHAR(255) NOT NULL,
-    type VARCHAR(50) NOT NULL,
-    event VARCHAR(100) NOT NULL
+    channel VARCHAR(50) NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
