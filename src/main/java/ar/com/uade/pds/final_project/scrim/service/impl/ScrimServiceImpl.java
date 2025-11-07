@@ -10,7 +10,6 @@ import ar.com.uade.pds.final_project.notifications.service.NotificationService;
 import ar.com.uade.pds.final_project.scrim.business.game.format.GameFormat;
 import ar.com.uade.pds.final_project.scrim.constants.ErrorDescription;
 import ar.com.uade.pds.final_project.scrim.constants.Region;
-import ar.com.uade.pds.final_project.scrim.constants.TeamName;
 import ar.com.uade.pds.final_project.scrim.entity.PlayerStats;
 import ar.com.uade.pds.final_project.scrim.entity.Scrim;
 import ar.com.uade.pds.final_project.scrim.business.game.state.ScrimStateType;
@@ -45,6 +44,7 @@ public class ScrimServiceImpl implements ScrimService {
     private final DataService dataService;
     private final NotificationService notificationService;
     private final IUserRepository userRepository;
+    private final TeamManagementService teamManagementService;
 
 
     /**
@@ -83,12 +83,13 @@ public class ScrimServiceImpl implements ScrimService {
                 .mode(mode.getValue())
                 .roles(roles)
                 .mmrMin(currentUser.getMmr())
+                .mmrMax(currentUser.getMmr() + 200)
                 .stateType(ScrimStateType.SEARCHING)
                 .state(new Searching())
                 .build();
 
         Scrim saved = scrimRepository.save(scrim);
-        List<Team> teams = constructTeams(saved);
+        List<Team> teams = teamManagementService.constructTeams(saved);
         saved.addTeams(teams);
         // El creador se une a la cola
         joinQueue(new JoinScrimRequest(saved.getId()));
@@ -228,7 +229,7 @@ public class ScrimServiceImpl implements ScrimService {
         validateUserNotInOtherScrim(currentUser.getId());
         validateJoinableScrim(scrim, currentUser.getId());
         System.out.println("Scrim válido para unirse — agregando participante...");
-        Team assignedTeam = selectTeam(scrim);
+        Team assignedTeam = teamManagementService.selectTeam(scrim);
         System.out.println("Equipo asignado: " + assignedTeam.getName());
 
         boolean captain = Objects.equals(currentUser.getId(), scrim.getIdCreator());
@@ -328,44 +329,6 @@ public class ScrimServiceImpl implements ScrimService {
     }
 
 
-    /**
-     * Selecciona un equipo de manera balanceada para un nuevo participante en el scrim.
-     *
-     * @param scrim El scrim al que se unirá el participante.
-     * @return El equipo asignado (Team.A o Team.B).
-     */
-    private Team selectTeam(Scrim scrim) {
-        // Obtenemos los equipos
-        Optional<Team> teamAlphaOpt = scrim.getTeams().stream()
-                .filter(t -> t.getName() == TeamName.ALPHA)
-                .findFirst();
-
-        Optional<Team> teamBravoOpt = scrim.getTeams().stream()
-                .filter(t -> t.getName() == TeamName.BRAVO)
-                .findFirst();
-
-        if (teamAlphaOpt.isEmpty() || teamBravoOpt.isEmpty()) {
-            throw new IllegalStateException("Los equipos ALPHA y BRAVO no fueron inicializados en el scrim.");
-        }
-
-        Team teamAlpha = teamAlphaOpt.get();
-        Team teamBravo = teamBravoOpt.get();
-
-        long countAlpha = teamAlpha.getParticipants().size();
-        long countBravo = teamBravo.getParticipants().size();
-
-        Team assignedTeam;
-        if (countAlpha < countBravo) {
-            assignedTeam = teamAlpha;
-        } else if (countBravo < countAlpha) {
-            assignedTeam = teamBravo;
-        } else {
-            assignedTeam = Math.random() < 0.5 ? teamAlpha : teamBravo;
-        }
-
-        return assignedTeam;
-    }
-
     private void validateUserNotInOtherScrim(Long userId) {
         List<Scrim> activeScrims = scrimRepository.findAllWithActiveStates();
         for (Scrim scrim : activeScrims) {
@@ -374,23 +337,5 @@ public class ScrimServiceImpl implements ScrimService {
                 throw new ScrimException(ErrorDescription.USER_ALREADY_IN_OTHER_SCRIM.getDescription());
             }
         }
-    }
-
-
-    private List<Team> constructTeams(Scrim scrim) {
-        Team alpha = new Team.Builder()
-                .name(TeamName.ALPHA)
-                .scrim(scrim)
-                .build();
-
-        Team bravo = new Team.Builder()
-                .name(TeamName.BRAVO)
-                .scrim(scrim)
-                .build();
-
-        List<Team> teams = new ArrayList<>();
-        teams.add(alpha);
-        teams.add(bravo);
-        return teams;
     }
 }

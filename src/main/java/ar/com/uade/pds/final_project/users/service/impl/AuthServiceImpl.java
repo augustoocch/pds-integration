@@ -11,6 +11,7 @@ import ar.com.uade.pds.final_project.notifications.service.NotificationService;
 import ar.com.uade.pds.final_project.scrim.constants.Region;
 import ar.com.uade.pds.final_project.security.ISecurityValidator;
 import ar.com.uade.pds.final_project.users.business.SessionContext;
+import ar.com.uade.pds.final_project.users.constants.Rank;
 import ar.com.uade.pds.final_project.users.constants.UsersErrorDetails;
 import ar.com.uade.pds.final_project.users.entity.Role;
 import ar.com.uade.pds.final_project.users.entity.User;
@@ -63,6 +64,7 @@ public class AuthServiceImpl implements AuthService {
                 .region(region.name())
                 .latency(Region.latencyByRegion(region))
                 .mmr(initialMmr)
+                .userRank(Rank.BRONZE)
                 .preferredRoles(List.of(preferredRole))
                 .emailVerified(false)
                 .build();

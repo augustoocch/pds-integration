@@ -3,9 +3,7 @@ package ar.com.uade.pds.final_project.menu;
 
 import ar.com.uade.pds.final_project.domain.controller.ScrimController;
 import ar.com.uade.pds.final_project.domain.controller.TeamManagementController;
-import ar.com.uade.pds.final_project.domain.dto.request.JoinScrimRequest;
-import ar.com.uade.pds.final_project.domain.dto.request.ScrimCreationRequest;
-import ar.com.uade.pds.final_project.domain.dto.request.SearchRequest;
+import ar.com.uade.pds.final_project.domain.dto.request.*;
 import ar.com.uade.pds.final_project.domain.dto.response.ResponseWrapper;
 import ar.com.uade.pds.final_project.domain.dto.response.ScrimDTO;
 import ar.com.uade.pds.final_project.users.entity.Role;
@@ -128,8 +126,8 @@ public class ScrimMenu {
         String roleInput = scanner.nextLine();
 
         try {
-            Role newRole = Role.valueOf(roleInput.toUpperCase());
-            ResponseWrapper response = teamManagementController.assignRole(scrimId, userId, newRole);
+            RoleAssignmentRequest request = new RoleAssignmentRequest(scrimId, userId, roleInput);
+            ResponseWrapper response = teamManagementController.assignRole(request);
             System.out.println(response.getMessage());
         } catch (IllegalArgumentException e) {
             System.out.println("Rol inválido. Intenta nuevamente.");
@@ -145,7 +143,8 @@ public class ScrimMenu {
         System.out.print("ID del Jugador B: ");
         Long userBId = Long.parseLong(scanner.nextLine());
 
-        ResponseWrapper response = teamManagementController.swapPlayers(scrimId, userAId, userBId);
+        SwapRequest request = new SwapRequest(scrimId, userAId, userBId);
+        ResponseWrapper response = teamManagementController.swapPlayers(request);
         System.out.println(response.getMessage());
     }
 

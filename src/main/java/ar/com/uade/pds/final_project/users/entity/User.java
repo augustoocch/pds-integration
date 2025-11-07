@@ -1,6 +1,7 @@
 package ar.com.uade.pds.final_project.users.entity;
 
 import ar.com.uade.pds.final_project.scrim.entity.PlayerStats;
+import ar.com.uade.pds.final_project.users.constants.Rank;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,9 +30,6 @@ public class User {
     @Column(nullable = false, name = "password_hash")
     private String passwordHash;
 
-    @Column(name = "range_per_game")
-    private String rangePerGame;
-
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
             name = "user_roles",
@@ -40,17 +38,12 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(name = "roles")
     private List<Role> preferredRoles;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "assigned_role")
-    private Role assignedRole;
-
     private String region;
-    private String preference;
-
     @Column(nullable = false, name = "email_verified")
     private boolean emailVerified;
-    private String userRank;
+
+    @Enumerated(EnumType.STRING)
+    private Rank userRank;
     private Integer mmr;
     private int latency;
 
@@ -62,14 +55,12 @@ public class User {
         this.username = builder.username;
         this.email = builder.email;
         this.passwordHash = builder.passwordHash;
-        this.rangePerGame = builder.rangePerGame;
         this.preferredRoles = builder.preferredRoles;
         this.region = builder.region;
-        this.preference = builder.preference;
         this.emailVerified = builder.emailVerified;
-        this.userRank = builder.userRank;
         this.mmr = builder.mmr;
         this.latency = builder.latency;
+        this.userRank = builder.userRank;
     }
 
     public static class Builder {
@@ -77,25 +68,21 @@ public class User {
         private String username;
         private String email;
         private String passwordHash;
-        private String rangePerGame;
         private List<Role> preferredRoles;
         private String region;
-        private String preference;
         private boolean emailVerified = false;
-        private String userRank;
         private Integer mmr;
         private int latency;
+        private Rank userRank;
 
         public Builder id(Long id) { this.id = id; return this; }
         public Builder username(String username) { this.username = username; return this; }
         public Builder email(String email) { this.email = email; return this; }
         public Builder passwordHash(String passwordHash) { this.passwordHash = passwordHash; return this; }
-        public Builder rangePerGame(String rangePerGame) { this.rangePerGame = rangePerGame; return this; }
+        public Builder userRank(Rank userRank) { this.userRank = userRank; return this; }
         public Builder preferredRoles(List<Role> preferredRoles) { this.preferredRoles = preferredRoles; return this; }
         public Builder region(String region) { this.region = region; return this; }
-        public Builder preference(String preference) { this.preference = preference; return this; }
         public Builder emailVerified(boolean emailVerified) { this.emailVerified = emailVerified; return this; }
-        public Builder userRank(String userRank) { this.userRank = userRank; return this; }
         public Builder mmr(Integer mmr) { this.mmr = mmr; return this; }
         public Builder latency(int latency) { this.latency = latency; return this; }
 

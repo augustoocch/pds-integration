@@ -109,6 +109,7 @@ public class Scrim {
         public Builder stateType(ScrimStateType stateType) { this.stateType = stateType; return this; }
         public Builder idCreator(Long idCreator) { this.idCreator = idCreator; return this; }
         public Builder mmrMin(Integer mmrMin) { this.mmrMin = mmrMin; return this; }
+        public Builder mmrMax(Integer mmrMax) { this.mmrMax = mmrMax; return this; }
 
         public Scrim build() {
             return new Scrim(this);

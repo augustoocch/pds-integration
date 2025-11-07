@@ -3,7 +3,7 @@ package ar.com.uade.pds.final_project.notifications.service.impl;
 import ar.com.uade.pds.final_project.notifications.event.DomainEvent;
 import ar.com.uade.pds.final_project.notifications.event.SubscribeRequest;
 import ar.com.uade.pds.final_project.notifications.exception.NotificationException;
-import ar.com.uade.pds.final_project.notifications.model.Subscriber;
+import ar.com.uade.pds.final_project.notifications.model.SubscriberData;
 import ar.com.uade.pds.final_project.notifications.repository.NotificationRepository;
 import ar.com.uade.pds.final_project.notifications.service.NotificationService;
 import ar.com.uade.pds.final_project.scrim.constants.ErrorDescription;
@@ -24,7 +24,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void subscribe(SubscribeRequest request) {
-        Subscriber subscriber = Subscriber.builder()
+        SubscriberData subscriber = SubscriberData.builder()
                 .userId(request.getUserId())
                 .address(request.getAddress())
                 .channel(request.getChannel())
@@ -43,7 +43,7 @@ public class NotificationServiceImpl implements NotificationService {
         if(currentUser == null) {
             throw new NotificationException(ErrorDescription.USER_NOT_FOUND.getDescription());
         }
-        List<Subscriber> subs = notificationRepository.findByUserId(currentUser.getId())
+        List<SubscriberData> subs = notificationRepository.findByUserId(currentUser.getId())
                 .stream()
                 .toList();
 

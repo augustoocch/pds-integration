@@ -12,14 +12,11 @@ CREATE TABLE IF NOT EXISTS users (
     username VARCHAR(255) NOT NULL UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    range_per_game VARCHAR(255),
     region VARCHAR(255),
-    preference VARCHAR(255),
     email_verified BOOLEAN NOT NULL DEFAULT FALSE,
     user_rank VARCHAR(255),
     mmr INT,
-    latency INT,
-    assigned_role VARCHAR(50) -- nuevo campo para el rol actual asignado en una partida
+    latency INT
 );
 
 CREATE TABLE IF NOT EXISTS user_roles (
@@ -29,11 +26,22 @@ CREATE TABLE IF NOT EXISTS user_roles (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-INSERT IGNORE INTO users (id, username, email, password_hash, range_per_game, region, preference, email_verified, user_rank, mmr, latency, assigned_role) VALUES
-(1, 'sniper_pro', 'sniper@example.com', '$2a$10$hashedpassword', '100-200', 'EU', 'Competitive', true, 'Gold', 150, 50, 'SNIPER'),
-(2, 'support_main', 'support@example.com', '$2a$10$hashedpassword', '50-100', 'NA', 'Casual', true, 'Silver', 80, 70, 'SUPPORT'),
-(3, 'tank_player', 'tank@example.com', '$2a$10$hashedpassword', '75-150', 'ASIA', 'Ranked', false, 'Bronze', 110, 120, 'TANK'),
-(4, 'mage_expert', 'mage@example.com', '$2a$10$hashedpassword', '120-250', 'EU', 'Competitive', true, 'Platinum', 200, 40, 'MAGE');
+INSERT IGNORE INTO users (
+    id,
+    username,
+    email,
+    password_hash,
+    region,
+    email_verified,
+    user_rank,
+    mmr,
+    latency
+) VALUES
+(1, 'sniper_pro', 'sniper@example.com', '$2a$10$hashedpassword', 'EU', true, 'Gold', 150, 50),
+(2, 'support_main', 'support@example.com', '$2a$10$hashedpassword', 'NA', true, 'Silver', 80, 70),
+(3, 'tank_player', 'tank@example.com', '$2a$10$hashedpassword', 'ASIA', false, 'Bronze', 110, 120),
+(4, 'mage_expert', 'mage@example.com', '$2a$10$hashedpassword', 'EU', true, 'Platinum', 200, 40);
+
 
 INSERT IGNORE INTO user_roles (user_id, roles) VALUES
 (1, 'SNIPER'),

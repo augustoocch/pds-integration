@@ -3,8 +3,6 @@ package ar.com.uade.pds.final_project.domain.config;
 import ar.com.uade.pds.final_project.notifications.service.NotificationService;
 import ar.com.uade.pds.final_project.scrim.business.command.ScrimCommandInvoker;
 import ar.com.uade.pds.final_project.scrim.repository.IScrimRepository;
-import ar.com.uade.pds.final_project.scrim.repository.ITeamRepository;
-import ar.com.uade.pds.final_project.scrim.repository.ScrimParticipantRepo;
 import ar.com.uade.pds.final_project.scrim.service.MatchMakingService;
 import ar.com.uade.pds.final_project.scrim.service.ScrimService;
 import ar.com.uade.pds.final_project.scrim.service.TeamManagementService;
@@ -25,10 +23,11 @@ public class ScrimConfig {
             IScrimRepository iScrimRepository,
                                      DataService dataService,
                                      NotificationService notificationService,
-                                     IUserRepository iUserRepository
+                                     IUserRepository iUserRepository,
+            TeamManagementService teamManagementService
                                      ) {
         return new ScrimServiceImpl(iScrimRepository, dataService,
-                notificationService, iUserRepository);
+                notificationService, iUserRepository, teamManagementService);
     }
 
     @Bean
@@ -48,10 +47,9 @@ public class ScrimConfig {
     }
 
     @Bean
-    public TeamManagementService teamManagementService(ITeamRepository teamRepository,
-                                                       IScrimRepository iScrimRepository,
+    public TeamManagementService teamManagementService(IScrimRepository iScrimRepository,
                                                        DataService dataService,
                                                        ScrimCommandInvoker scrimCommandInvoker) {
-        return new TeamManagementServiceImpl(teamRepository, iScrimRepository, dataService, scrimCommandInvoker);
+        return new TeamManagementServiceImpl(iScrimRepository, dataService, scrimCommandInvoker);
     }
 }

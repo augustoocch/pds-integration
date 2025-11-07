@@ -19,15 +19,15 @@ public class NotificationManager {
     private final NotificationFactory notificationFactory;
 
     public void processEvent(DomainEvent event) {
-        List<Subscriber> subs = getSubscribersToNotify(event);
+        List<SubscriberData> subs = getSubscribersToNotify(event);
         if (subs.isEmpty()) {
             log.info("No hay suscriptores para eventos.");
             return;
         }
         String message = buildMessage(event);
-        for (Subscriber sub : subs) {
+        for (SubscriberData sub : subs) {
             if (Objects.equals(sub.getUserId(), event.getUserNotNotifiable())) continue;
-            INotifier notifier = notificationFactory.createNotifier(sub.getChannel());
+            ISubscriber notifier = notificationFactory.createNotifier(sub.getChannel());
             try {
                 notifier.notify(sub.getAddress(), message);
             } catch (Exception e) {
@@ -47,11 +47,11 @@ public class NotificationManager {
         };
     }
 
-    private List<Subscriber> getSubscribersToNotify(DomainEvent event) {
+    private List<SubscriberData> getSubscribersToNotify(DomainEvent event) {
         if (event.getSubscribersToNotify().isEmpty()) {
             return notificationRepository.findAll();
         } else {
-            List<Subscriber> subs = new ArrayList<>();
+            List<SubscriberData> subs = new ArrayList<>();
             for (Long subId : event.getSubscribersToNotify()) {
                 notificationRepository.findById(subId).ifPresent(subs::add);
             }

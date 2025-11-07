@@ -32,7 +32,6 @@ public class DataServiceImpl implements DataService {
                 .email(user.getEmail())
                 .preferredRoles(user.getPreferredRoles())
                 .region(user.getRegion())
-                .preference(user.getPreference())
                 .build();
     }
 

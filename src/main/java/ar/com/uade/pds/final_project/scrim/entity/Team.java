@@ -7,11 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @Entity
@@ -37,13 +34,6 @@ public class Team {
 
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ScrimParticipant> participants = new ArrayList<>();
-
-    public double getAverageMmr() {
-        return participants.stream()
-                .mapToInt(ScrimParticipant::getMmr)
-                .average()
-                .orElse(0.0);
-    }
 
     public boolean isFull() {
         return participants.size() >= scrim.getPlayers() / 2;

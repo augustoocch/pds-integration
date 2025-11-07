@@ -32,7 +32,6 @@ public class SecurityValidator implements ISecurityValidator {
                 .setSubject(user.getEmail())
                 .claim("username", user.getUsername())
                 .claim("region", user.getRegion())
-                .claim("preference", user.getPreference())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_MS))
                 .signWith(secretKey, SignatureAlgorithm.HS256)
@@ -52,7 +51,6 @@ public class SecurityValidator implements ISecurityValidator {
                     .email(claims.getSubject())
                     .username((String) claims.get("username"))
                     .region((String) claims.get("region"))
-                    .preference((String) claims.get("preference"))
                     .build();
 
         } catch (ExpiredJwtException e) {
