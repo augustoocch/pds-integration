@@ -8,9 +8,10 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
-
+@Slf4j
 @Entity
 @Table(name = "scrim")
 @Getter
@@ -42,21 +43,22 @@ public class Scrim {
     @Enumerated(EnumType.STRING)
     private ScrimStateType stateType;
 
-    @ManyToMany
-    @JoinTable(
-            name = "scrim_participants",
-            joinColumns = @JoinColumn(name = "scrim_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private Set<User> participants = new HashSet<>();
+    @OneToMany(mappedBy = "scrim", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Team> teams = new ArrayList<>();
+
     @ElementCollection
     @CollectionTable(name = "scrim_confirmed_users", joinColumns = @JoinColumn(name = "scrim_id"))
     @Column(name = "user_id")
     private Set<Long> confirmedUsers = new HashSet<>();
     private Integer mmrMin;
     private Integer mmrMax;
+
     @Transient
     private final List<DomainEvent> domainEvents = new ArrayList<>();
+
+    @OneToMany(mappedBy = "scrim", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PlayerStats> playerStats = new ArrayList<>();
+
 
 
     private Scrim(Builder builder) {
@@ -72,7 +74,7 @@ public class Scrim {
         this.mode = builder.mode;
         this.state = builder.state != null ? builder.state : new Searching();
         this.stateType = builder.stateType != null ? builder.stateType : ScrimStateType.SEARCHING;
-        this.participants = builder.participants != null ? builder.participants : new HashSet<>();
+        this.teams = new ArrayList<>();
         this.mmrMin = builder.mmrMin;
         this.mmrMax = builder.mmrMax;
     }
@@ -90,7 +92,6 @@ public class Scrim {
         private String mode;
         private ScrimState state;
         private ScrimStateType stateType;
-        private Set<User> participants;
         private Integer mmrMin;
         private Integer mmrMax;
         private Long idCreator;
@@ -108,7 +109,6 @@ public class Scrim {
         public Builder stateType(ScrimStateType stateType) { this.stateType = stateType; return this; }
         public Builder idCreator(Long idCreator) { this.idCreator = idCreator; return this; }
         public Builder mmrMin(Integer mmrMin) { this.mmrMin = mmrMin; return this; }
-        public Builder mmrMax(Integer mmrMax) { this.mmrMax = mmrMax; return this; }
 
         public Scrim build() {
             return new Scrim(this);
@@ -136,14 +136,6 @@ public class Scrim {
         return this.stateType == ScrimStateType.SEARCHING;
     }
 
-    public boolean isFull() {
-        return participants.size() >= players;
-    }
-
-    public void addParticipant(User u) {
-        this.participants.add(u);
-    }
-
     public void addDomainEvent(DomainEvent event) {
         this.domainEvents.add(event);
     }
@@ -151,5 +143,49 @@ public class Scrim {
     public void setCurrentState() {
         ScrimState state = ScrimStateType.scrimStateFromString(this.stateType);
         this.setState(state);
+    }
+
+
+    public boolean isFull() {
+        return teams.stream().allMatch(Team::isFull);
+    }
+
+    public void addTeams(List<Team> teams) {
+        if (teams == null) return;
+        teams.forEach(this::addTeam);
+    }
+
+
+    public void addTeam(Team team) {
+        this.teams.add(team);
+        team.setScrim(this);
+    }
+
+
+
+    public List<ScrimParticipant> getAllParticipants() {
+        return teams.stream()
+                .flatMap(team -> team.getParticipants().stream())
+                .toList();
+    }
+
+    public boolean validStateToSwitch() {
+        return this.getStateType() == ScrimStateType.LOBBY;
+    }
+
+    public void addPlayerStat(PlayerStats stat) {
+        stat.setScrim(this);
+        this.playerStats.add(stat);
+    }
+
+    public Optional<ScrimParticipant> findParticipantByUserId(Long userId) {
+        return this.getAllParticipants().stream()
+                .filter(participant -> participant.getUser().getId().equals(userId))
+                .findFirst();
+    }
+
+    public boolean participantInOtherScrim(Long userId) {
+        return this.getAllParticipants().stream()
+                .anyMatch(participant -> participant.equalIds(userId));
     }
 }

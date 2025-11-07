@@ -1,8 +1,10 @@
 package ar.com.uade.pds.final_project.users.entity;
 
+import ar.com.uade.pds.final_project.scrim.entity.PlayerStats;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -39,6 +41,10 @@ public class User {
     @Column(name = "roles")
     private List<Role> preferredRoles;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "assigned_role")
+    private Role assignedRole;
+
     private String region;
     private String preference;
 
@@ -48,7 +54,9 @@ public class User {
     private Integer mmr;
     private int latency;
 
-    // Constructor privado para el Builder
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PlayerStats> playerStats = new ArrayList<>();
+
     private User(Builder builder) {
         this.id = builder.id;
         this.username = builder.username;
@@ -64,7 +72,6 @@ public class User {
         this.latency = builder.latency;
     }
 
-    // Builder manual
     public static class Builder {
         private Long id;
         private String username;
@@ -99,5 +106,9 @@ public class User {
 
     public void verifyEmail() {
         this.emailVerified = true;
+    }
+
+    public void addPlayerStat(PlayerStats stat) {
+        this.playerStats.add(stat);
     }
 }

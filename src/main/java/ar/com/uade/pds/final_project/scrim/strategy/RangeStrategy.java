@@ -7,6 +7,7 @@ import ar.com.uade.pds.final_project.domain.dto.request.JoinScrimRequest;
 import ar.com.uade.pds.final_project.domain.dto.request.MatchmakingRequest;
 import ar.com.uade.pds.final_project.scrim.business.game.state.ScrimStateType;
 import ar.com.uade.pds.final_project.scrim.entity.Scrim;
+import ar.com.uade.pds.final_project.scrim.entity.ScrimParticipant;
 import ar.com.uade.pds.final_project.scrim.exception.MatchmakingException;
 import ar.com.uade.pds.final_project.scrim.service.ScrimService;
 import ar.com.uade.pds.final_project.users.entity.User;
@@ -14,7 +15,6 @@ import ar.com.uade.pds.final_project.users.service.DataService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import java.util.List;
-import java.util.Objects;
 
 @AllArgsConstructor
 public class RangeStrategy implements MatchMakingStrategy {
@@ -24,6 +24,11 @@ public class RangeStrategy implements MatchMakingStrategy {
 
     private static final int DEFAULT_MAX_MMR_DIFF = 300;
 
+    /**
+     * RangeStrategy matches users to scrims based on MMR range.
+     * MMR it means Match Making Rating, a skill rating system.
+     * @param request
+     */
     @Override
     @Transactional
     public void execute(MatchmakingRequest request) {
@@ -42,9 +47,8 @@ public class RangeStrategy implements MatchMakingStrategy {
                     if (min != null && max != null) {
                         return userMmr >= min && userMmr <= max;
                     }
-                    Double avg = scrim.getParticipants().stream()
-                            .map(User::getMmr)
-                            .filter(Objects::nonNull)
+                    Double avg = scrim.getAllParticipants().stream()
+                            .map(ScrimParticipant::getMmr)
                             .mapToInt(Integer::intValue)
                             .average()
                             .orElse(userMmr);

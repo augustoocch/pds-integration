@@ -21,5 +21,9 @@ public interface IScrimRepository extends JpaRepository<Scrim, Long> {
 
 
     List<Scrim> findAllByStateType(ScrimStateType stateType);
+
+
+    @Query("SELECT s FROM Scrim s WHERE s.stateType IN ('SEARCHING', 'IN_GAME', 'LOBBY', 'CONFIRMED')")
+    List<Scrim> findAllWithActiveStates();
 }
 

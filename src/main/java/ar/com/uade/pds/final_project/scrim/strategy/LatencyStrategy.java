@@ -26,6 +26,11 @@ public class LatencyStrategy implements MatchMakingStrategy {
     private static final int MAX_LATENCY_DIFFERENCE = 50;
     private static final int MAX_ACCEPTABLE_LATENCY = 180;
 
+    /**
+     * Busca un scrim cuyo promedio de latencia esté dentro de un rango aceptable
+     * en relación a la latencia del usuario que realiza la solicitud.
+     * @param request
+     */
     @Override
     @Transactional
     public void execute(MatchmakingRequest request) {

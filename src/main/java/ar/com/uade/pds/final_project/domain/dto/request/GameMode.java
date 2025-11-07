@@ -7,7 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum GameMode {
     RANKED("ranked"),
-    UNRANKED("casual");
+    CASUAL("casual");
 
     private final String value;
 

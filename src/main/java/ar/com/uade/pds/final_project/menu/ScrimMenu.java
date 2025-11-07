@@ -2,23 +2,24 @@ package ar.com.uade.pds.final_project.menu;
 
 
 import ar.com.uade.pds.final_project.domain.controller.ScrimController;
-import ar.com.uade.pds.final_project.domain.dto.request.GameFormatValue;
+import ar.com.uade.pds.final_project.domain.controller.TeamManagementController;
 import ar.com.uade.pds.final_project.domain.dto.request.JoinScrimRequest;
 import ar.com.uade.pds.final_project.domain.dto.request.ScrimCreationRequest;
 import ar.com.uade.pds.final_project.domain.dto.request.SearchRequest;
 import ar.com.uade.pds.final_project.domain.dto.response.ResponseWrapper;
 import ar.com.uade.pds.final_project.domain.dto.response.ScrimDTO;
+import ar.com.uade.pds.final_project.users.entity.Role;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Scanner;
-
 @Component
 @AllArgsConstructor
 public class ScrimMenu {
 
-    private final ScrimController controller;
+    private final ScrimController scrimController;
+    private final TeamManagementController teamManagementController;
 
     public void show(Scanner scanner) {
         boolean back = false;
@@ -30,6 +31,9 @@ public class ScrimMenu {
             System.out.println("4. Confirmar scrim");
             System.out.println("5. Buscar scrims");
             System.out.println("6. Unirse a una cola");
+            System.out.println("7. Asignar rol a jugador");
+            System.out.println("8. Intercambiar jugadores");
+            System.out.println("9. Deshacer última acción");
             System.out.println("0. Volver al menú principal");
             System.out.print("Selecciona una opción: ");
 
@@ -41,6 +45,9 @@ public class ScrimMenu {
                 case "4" -> handleConfirmScrim(scanner);
                 case "5" -> handleSearchScrim(scanner);
                 case "6" -> handleJoinQueue(scanner);
+                case "7" -> handleAssignRole(scanner);
+                case "8" -> handleSwapPlayers(scanner);
+                case "9" -> handleUndoLastAction();
                 case "0" -> back = true;
                 default -> System.out.println("Opción inválida.");
             }
@@ -56,30 +63,29 @@ public class ScrimMenu {
         System.out.print("Modo de juego (ranked, casual): ");
         String mode = scanner.nextLine();
 
-        ScrimCreationRequest request = new ScrimCreationRequest(game,
-                format, mode);
-        ResponseWrapper response = controller.createScrim(request);
+        ScrimCreationRequest request = new ScrimCreationRequest(game, format, mode);
+        ResponseWrapper response = scrimController.createScrim(request);
         System.out.println(response.getMessage());
     }
 
     private void handleEndScrim(Scanner scanner) {
         System.out.print("ID del scrim: ");
         Long id = Long.parseLong(scanner.nextLine());
-        ResponseWrapper response = controller.endScrim(id);
+        ResponseWrapper response = scrimController.endScrim(id);
         System.out.println(response.getMessage());
     }
 
     private void handleCancelScrim(Scanner scanner) {
         System.out.print("ID del scrim: ");
         Long id = Long.parseLong(scanner.nextLine());
-        ResponseWrapper response = controller.cancelScrim(id);
+        ResponseWrapper response = scrimController.cancelScrim(id);
         System.out.println(response.getMessage());
     }
 
     private void handleConfirmScrim(Scanner scanner) {
         System.out.print("ID del scrim: ");
         Long id = Long.parseLong(scanner.nextLine());
-        ResponseWrapper response = controller.confirmScrim(id);
+        ResponseWrapper response = scrimController.confirmScrim(id);
         System.out.println(response.getMessage());
     }
 
@@ -87,14 +93,14 @@ public class ScrimMenu {
         System.out.println("\n--- Buscar Scrims ---");
         System.out.print("Juego (desert, urban, space): ");
         String game = scanner.nextLine();
-        System.out.print("Region (LATAM, US, EU, ASIA): ");
+        System.out.print("Región (LATAM, US, EU, ASIA): ");
         String region = scanner.nextLine();
         System.out.print("Formato (1V1, 2V2, 5V5): ");
         String format = scanner.nextLine();
 
         SearchRequest request = new SearchRequest(game, region, format);
-        ResponseWrapper response = controller.searchScrim(request);
-        if(!response.isSuccess()) {
+        ResponseWrapper response = scrimController.searchScrim(request);
+        if (!response.isSuccess()) {
             System.out.println("Error al buscar scrims: " + response.getMessage());
             return;
         }
@@ -105,13 +111,50 @@ public class ScrimMenu {
     private void handleJoinQueue(Scanner scanner) {
         System.out.print("ID del scrim: ");
         Long idScrim = Long.parseLong(scanner.nextLine());
-
         JoinScrimRequest request = new JoinScrimRequest(idScrim);
-        ResponseWrapper response = controller.joinQueue(request);
+        ResponseWrapper response = scrimController.joinQueue(request);
         System.out.println(response.getMessage());
     }
 
+    // === FUNCIONALIDADES DE EQUIPOS ===
 
+    private void handleAssignRole(Scanner scanner) {
+        System.out.println("\n--- Asignar rol a jugador ---");
+        System.out.print("ID del scrim: ");
+        Long scrimId = Long.parseLong(scanner.nextLine());
+        System.out.print("ID del jugador: ");
+        Long userId = Long.parseLong(scanner.nextLine());
+        System.out.print("Nuevo rol (sniper, support, tank, warrior, assassin, mage, marksman): ");
+        String roleInput = scanner.nextLine();
+
+        try {
+            Role newRole = Role.valueOf(roleInput.toUpperCase());
+            ResponseWrapper response = teamManagementController.assignRole(scrimId, userId, newRole);
+            System.out.println(response.getMessage());
+        } catch (IllegalArgumentException e) {
+            System.out.println("Rol inválido. Intenta nuevamente.");
+        }
+    }
+
+    private void handleSwapPlayers(Scanner scanner) {
+        System.out.println("\n--- Intercambiar jugadores ---");
+        System.out.print("ID del scrim: ");
+        Long scrimId = Long.parseLong(scanner.nextLine());
+        System.out.print("ID del Jugador A: ");
+        Long userAId = Long.parseLong(scanner.nextLine());
+        System.out.print("ID del Jugador B: ");
+        Long userBId = Long.parseLong(scanner.nextLine());
+
+        ResponseWrapper response = teamManagementController.swapPlayers(scrimId, userAId, userBId);
+        System.out.println(response.getMessage());
+    }
+
+    private void handleUndoLastAction() {
+        ResponseWrapper response = teamManagementController.undoLastAction();
+        System.out.println(response.getMessage());
+    }
+
+    // === UTILITARIO ===
 
     public void printAllScrimsFound(List<ScrimDTO> scrims) {
         if (scrims.isEmpty()) {

@@ -1,9 +1,12 @@
--- Create database if not exists
+-- =====================
+-- DATABASE
+-- =====================
 CREATE DATABASE IF NOT EXISTS pds_project;
-
 USE pds_project;
 
--- Create users table
+-- =====================
+-- USERS
+-- =====================
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(255) NOT NULL UNIQUE,
@@ -15,10 +18,10 @@ CREATE TABLE IF NOT EXISTS users (
     email_verified BOOLEAN NOT NULL DEFAULT FALSE,
     user_rank VARCHAR(255),
     mmr INT,
-    latency INT
+    latency INT,
+    assigned_role VARCHAR(50) -- nuevo campo para el rol actual asignado en una partida
 );
 
--- User roles table
 CREATE TABLE IF NOT EXISTS user_roles (
     user_id BIGINT NOT NULL,
     roles VARCHAR(50) NOT NULL,
@@ -26,14 +29,12 @@ CREATE TABLE IF NOT EXISTS user_roles (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Insert sample users
-INSERT IGNORE INTO users (id, username, email, password_hash, range_per_game, region, preference, email_verified, user_rank, mmr, latency) VALUES
-(1, 'sniper_pro', 'sniper@example.com', '$2a$10$hashedpassword', '100-200', 'EU', 'Competitive', true, 'Gold', 150, 50),
-(2, 'support_main', 'support@example.com', '$2a$10$hashedpassword', '50-100', 'NA', 'Casual', true, 'Silver', 80, 70),
-(3, 'tank_player', 'tank@example.com', '$2a$10$hashedpassword', '75-150', 'ASIA', 'Ranked', false, 'Bronze', 110, 120),
-(4, 'mage_expert', 'mage@example.com', '$2a$10$hashedpassword', '120-250', 'EU', 'Competitive', true, 'Platinum', 200, 40);
+INSERT IGNORE INTO users (id, username, email, password_hash, range_per_game, region, preference, email_verified, user_rank, mmr, latency, assigned_role) VALUES
+(1, 'sniper_pro', 'sniper@example.com', '$2a$10$hashedpassword', '100-200', 'EU', 'Competitive', true, 'Gold', 150, 50, 'SNIPER'),
+(2, 'support_main', 'support@example.com', '$2a$10$hashedpassword', '50-100', 'NA', 'Casual', true, 'Silver', 80, 70, 'SUPPORT'),
+(3, 'tank_player', 'tank@example.com', '$2a$10$hashedpassword', '75-150', 'ASIA', 'Ranked', false, 'Bronze', 110, 120, 'TANK'),
+(4, 'mage_expert', 'mage@example.com', '$2a$10$hashedpassword', '120-250', 'EU', 'Competitive', true, 'Platinum', 200, 40, 'MAGE');
 
--- Insert sample roles for users
 INSERT IGNORE INTO user_roles (user_id, roles) VALUES
 (1, 'SNIPER'),
 (1, 'MARKSMAN'),
@@ -45,7 +46,9 @@ INSERT IGNORE INTO user_roles (user_id, roles) VALUES
 (4, 'SUPPORT'),
 (4, 'ASSASSIN');
 
--- Scrim table
+-- =====================
+-- SCRIMS
+-- =====================
 CREATE TABLE IF NOT EXISTS scrim (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     game VARCHAR(255),
@@ -58,28 +61,11 @@ CREATE TABLE IF NOT EXISTS scrim (
     mode VARCHAR(255),
     state_type VARCHAR(50),
     mmr_min INT,
-    mmr_max INT
+    mmr_max INT,
+    FOREIGN KEY (id_creator) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Scrim confirmed users (ElementCollection)
 CREATE TABLE IF NOT EXISTS scrim_confirmed_users (
-    scrim_id BIGINT NOT NULL,
-    user_id BIGINT NOT NULL,
-    PRIMARY KEY (scrim_id, user_id),
-    CONSTRAINT fk_scrim FOREIGN KEY (scrim_id) REFERENCES scrim(id),
-    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id)
-);
-
--- Scrim roles (ElementCollection)
-CREATE TABLE IF NOT EXISTS scrim_roles (
-    scrim_id BIGINT NOT NULL,
-    role VARCHAR(50) NOT NULL,
-    PRIMARY KEY (scrim_id, role),
-    FOREIGN KEY (scrim_id) REFERENCES scrim(id) ON DELETE CASCADE
-);
-
--- Scrim participants (ManyToMany)
-CREATE TABLE IF NOT EXISTS scrim_participants (
     scrim_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
     PRIMARY KEY (scrim_id, user_id),
@@ -87,7 +73,65 @@ CREATE TABLE IF NOT EXISTS scrim_participants (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Subscribers table for notifications
+CREATE TABLE IF NOT EXISTS scrim_roles (
+    scrim_id BIGINT NOT NULL,
+    role VARCHAR(50) NOT NULL,
+    PRIMARY KEY (scrim_id, role),
+    FOREIGN KEY (scrim_id) REFERENCES scrim(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS team (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    winner BOOLEAN DEFAULT FALSE,
+    scrim_id BIGINT NOT NULL,
+    FOREIGN KEY (scrim_id) REFERENCES scrim(id) ON DELETE CASCADE
+);
+
+
+-- =====================
+-- SCRIM PARTICIPANTS
+-- =====================
+CREATE TABLE IF NOT EXISTS scrim_participant (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    team_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    assigned_role VARCHAR(50),
+    captain BOOLEAN DEFAULT FALSE,
+    confirmed BOOLEAN DEFAULT FALSE,
+    is_winner BOOLEAN DEFAULT FALSE,
+    score INT DEFAULT 0,
+    mmr INT DEFAULT 0,
+    FOREIGN KEY (team_id) REFERENCES team(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE(team_id, user_id)
+);
+
+
+
+-- =====================
+-- PLAYER STATS
+-- =====================
+CREATE TABLE IF NOT EXISTS player_stats (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    scrim_id BIGINT NOT NULL,
+    assigned_role VARCHAR(50),
+    game VARCHAR(100),
+    region VARCHAR(50),
+    score INT,
+    result VARCHAR(20),
+    mmr_before INT,
+    mmr_after INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (scrim_id) REFERENCES scrim(id) ON DELETE CASCADE
+);
+
+
+-- =====================
+-- NOTIFICATIONS
+-- =====================
 CREATE TABLE IF NOT EXISTS subscribers (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL,

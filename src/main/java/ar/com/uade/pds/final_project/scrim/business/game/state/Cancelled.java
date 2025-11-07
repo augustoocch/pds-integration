@@ -3,6 +3,7 @@ package ar.com.uade.pds.final_project.scrim.business.game.state;
 import ar.com.uade.pds.final_project.notifications.event.DomainEvent;
 import ar.com.uade.pds.final_project.notifications.event.EventType;
 import ar.com.uade.pds.final_project.scrim.entity.Scrim;
+import ar.com.uade.pds.final_project.scrim.entity.ScrimParticipant;
 import ar.com.uade.pds.final_project.users.entity.User;
 
 import java.util.List;
@@ -10,9 +11,9 @@ import java.util.List;
 public class Cancelled implements ScrimState {
 
     public Cancelled(Scrim scrim, Long userNotNotifiable) {
-        List<Long> subscribersToNotify = scrim.getParticipants()
+        List<Long> subscribersToNotify = scrim.getAllParticipants()
                 .stream()
-                .map(User::getId)
+                .map(ScrimParticipant::getId)
                 .toList();
 
         scrim.addDomainEvent(new DomainEvent(

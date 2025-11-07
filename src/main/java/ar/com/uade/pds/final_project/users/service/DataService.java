@@ -7,4 +7,5 @@ public interface DataService {
     boolean checkIsAuthenticated();
     UserDTO findDTOUserWithToken();
     User findUserWithToken();
+    User findUserById(Long userId);
 }

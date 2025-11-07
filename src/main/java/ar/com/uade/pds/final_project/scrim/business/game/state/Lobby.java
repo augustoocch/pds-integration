@@ -1,6 +1,7 @@
 package ar.com.uade.pds.final_project.scrim.business.game.state;
 
 import ar.com.uade.pds.final_project.scrim.entity.Scrim;
+import ar.com.uade.pds.final_project.scrim.entity.ScrimParticipant;
 import ar.com.uade.pds.final_project.scrim.exception.ScrimException;
 import ar.com.uade.pds.final_project.users.entity.User;
 import lombok.extern.slf4j.Slf4j;
@@ -32,9 +33,9 @@ public class Lobby implements ScrimState {
     public void confirm(Scrim scrim, User user) {
         scrim.getConfirmedUsers().add(user.getId());
         boolean allConfirmed = scrim.getConfirmedUsers()
-                .containsAll(scrim.getParticipants()
+                .containsAll(scrim.getAllParticipants()
                         .stream()
-                        .map(User::getId)
+                        .map(ScrimParticipant::getId)
                         .toList()
                 );
 

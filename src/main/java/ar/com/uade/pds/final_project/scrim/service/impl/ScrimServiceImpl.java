@@ -10,23 +10,29 @@ import ar.com.uade.pds.final_project.notifications.service.NotificationService;
 import ar.com.uade.pds.final_project.scrim.business.game.format.GameFormat;
 import ar.com.uade.pds.final_project.scrim.constants.ErrorDescription;
 import ar.com.uade.pds.final_project.scrim.constants.Region;
+import ar.com.uade.pds.final_project.scrim.constants.TeamName;
+import ar.com.uade.pds.final_project.scrim.entity.PlayerStats;
 import ar.com.uade.pds.final_project.scrim.entity.Scrim;
 import ar.com.uade.pds.final_project.scrim.business.game.state.ScrimStateType;
 import ar.com.uade.pds.final_project.scrim.business.game.state.Searching;
+import ar.com.uade.pds.final_project.scrim.entity.ScrimParticipant;
+import ar.com.uade.pds.final_project.scrim.entity.Team;
 import ar.com.uade.pds.final_project.scrim.exception.ScrimException;
 import ar.com.uade.pds.final_project.scrim.repository.IScrimRepository;
 import ar.com.uade.pds.final_project.scrim.service.ScrimService;
+import ar.com.uade.pds.final_project.scrim.service.TeamManagementService;
 import ar.com.uade.pds.final_project.users.constants.UsersErrorDetails;
 import ar.com.uade.pds.final_project.users.entity.Role;
 import ar.com.uade.pds.final_project.users.entity.User;
 import ar.com.uade.pds.final_project.users.exception.UsersException;
+import ar.com.uade.pds.final_project.users.repository.IUserRepository;
 import ar.com.uade.pds.final_project.users.service.DataService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -38,13 +44,23 @@ public class ScrimServiceImpl implements ScrimService {
     private final IScrimRepository scrimRepository;
     private final DataService dataService;
     private final NotificationService notificationService;
+    private final IUserRepository userRepository;
 
+
+    /**
+     * Crea un nuevo scrim basado en la solicitud proporcionada.
+     * El usuario autenticado se establece como el creador del scrim.
+     * Al crear el scrim, el creador se une automáticamente a la cola del scrim y se asigna como capitan.
+     *
+     * @param request
+     * @return
+     */
     @Override
     public ValidationDTOResponse createScrim(ScrimCreationRequest request) {
-
-        if(!dataService.checkIsAuthenticated()) {
+        if (!dataService.checkIsAuthenticated()) {
             throw new UsersException(UsersErrorDetails.USER_NOT_AUTHENTICATED.getMessage());
         }
+
         GameFormat gameFormat = GameFormat.fromString(request.getFormat());
         GameValue game = GameValue.fromString(request.getGame().toLowerCase());
         GameMode mode = GameMode.fromString(request.getMode().toLowerCase());
@@ -52,7 +68,8 @@ public class ScrimServiceImpl implements ScrimService {
         int estimatedDuration = gameFormat.getGameEstDuration();
         List<Role> roles = gameFormat.getAvailableRoles();
 
-        UserDTO currentUser = dataService.findDTOUserWithToken();
+        User currentUser = dataService.findUserWithToken();
+        validateUserNotInOtherScrim(currentUser.getId());
         Region region = Region.fromValue(currentUser.getRegion());
 
         Scrim scrim = new Scrim.Builder()
@@ -71,37 +88,65 @@ public class ScrimServiceImpl implements ScrimService {
                 .build();
 
         Scrim saved = scrimRepository.save(scrim);
+        List<Team> teams = constructTeams(saved);
+        saved.addTeams(teams);
+        // El creador se une a la cola
+        joinQueue(new JoinScrimRequest(saved.getId()));
         DomainEvent event = getEventForScrimCreation(saved, currentUser.getId());
         notificationService.process(event);
         return new ValidationDTOResponse(true, null);
     }
 
+
     @Override
     public ValidationDTOResponse endScrim(Long id) {
-        if(!dataService.checkIsAuthenticated()) {
+        if (!dataService.checkIsAuthenticated()) {
             throw new UsersException(UsersErrorDetails.USER_NOT_AUTHENTICATED.getMessage());
         }
+
         Scrim scrim = scrimRepository.findById(id)
                 .orElseThrow(() -> new ScrimException(ErrorDescription.SCRIM_NOT_FOUND.getDescription()));
-        try {
-            scrim.setCurrentState();
-            scrim.end();
-            scrimRepository.save(scrim);
-            return new ValidationDTOResponse(true, null);
-        } catch (Exception e) {
-            throw new ScrimException(ErrorDescription.SCRIM_CANNOT_CHANGE_STATE.getDescription());
+
+        scrim.setCurrentState();
+        scrim.end();
+        for (ScrimParticipant participant : scrim.getAllParticipants()) {
+            log.info("Registrando estadística para participante {}", participant.getId());
+
+            PlayerStats stats = new PlayerStats.Builder()
+                    .id(participant.getId())
+                    .scrim(scrim)
+                    .assignedRole(participant.getAssignedRole())
+                    .game(scrim.getGame())
+                    .region(scrim.getRegion())
+                    .mmrBefore(dataService.findUserWithToken().getMmr())
+                    .mmrAfter(calculateNewMmr(participant))
+                    .score(participant.getScore())
+                    .result(participant.isWinner()
+                            ? PlayerStats.MatchResult.WIN
+                            : PlayerStats.MatchResult.LOSE)
+                    .build();
+
+            User user = dataService.findUserById(participant.getId());
+            user.addPlayerStat(stats);
+            scrim.addPlayerStat(stats);
+            userRepository.save(user);
         }
+        scrimRepository.save(scrim);
+        scrim.getDomainEvents()
+                .forEach(notificationService::process);
+
+        return new ValidationDTOResponse(true, null);
     }
 
     @Override
     public ValidationDTOResponse cancelScrim(Long id) {
-        if(!dataService.checkIsAuthenticated()) {
+        if (!dataService.checkIsAuthenticated()) {
             throw new UsersException(UsersErrorDetails.USER_NOT_AUTHENTICATED.getMessage());
         }
         Scrim scrim = scrimRepository.findById(id)
                 .orElseThrow(() -> new ScrimException(ErrorDescription.SCRIM_NOT_FOUND.getDescription()));
         User currentUser = dataService.findUserWithToken();
-        if(currentUser == null) {
+        if (currentUser == null) {
             throw new ScrimException(ErrorDescription.USER_NOT_FOUND.getDescription());
         }
         scrim.setCurrentState();
@@ -114,13 +159,13 @@ public class ScrimServiceImpl implements ScrimService {
 
     @Override
     public ValidationDTOResponse confirmScrim(Long id) {
-        if(!dataService.checkIsAuthenticated()) {
+        if (!dataService.checkIsAuthenticated()) {
             throw new UsersException(UsersErrorDetails.USER_NOT_AUTHENTICATED.getMessage());
         }
         Scrim scrim = scrimRepository.findById(id)
                 .orElseThrow(() -> new ScrimException(ErrorDescription.SCRIM_NOT_FOUND.getDescription()));
         User currentUser = dataService.findUserWithToken();
-        if(currentUser == null) {
+        if (currentUser == null) {
             throw new ScrimException(ErrorDescription.USER_NOT_FOUND.getDescription());
         }
         scrim.setCurrentState();
@@ -139,11 +184,11 @@ public class ScrimServiceImpl implements ScrimService {
                 request.getFormat()
         );
 
-        if(scrims.isEmpty()) {
+        if (scrims.isEmpty()) {
             System.out.println("No se encontraron scrims con los filtros proporcionados.");
             List<ScrimDTO> others = this.searchAvailableScrims();
-            if(others.isEmpty()) {
-                 throw new ScrimException(ErrorDescription.NOT_AVAILABLE_SCRIMS.getDescription());
+            if (others.isEmpty()) {
+                throw new ScrimException(ErrorDescription.NOT_AVAILABLE_SCRIMS.getDescription());
             }
             System.out.println("Sin embargo, Se encontraron scrims disponibles sin filtros");
             return others;
@@ -166,27 +211,47 @@ public class ScrimServiceImpl implements ScrimService {
     }
 
     @Override
+    @Transactional
     public ValidationDTOResponse joinQueue(JoinScrimRequest request) {
-        if(!dataService.checkIsAuthenticated()) {
+        if (!dataService.checkIsAuthenticated()) {
             throw new UsersException(UsersErrorDetails.USER_NOT_AUTHENTICATED.getMessage());
         }
+
         Scrim scrim = scrimRepository.findById(request.getIdScrim())
                 .orElseThrow(() -> new ScrimException(ErrorDescription.SCRIM_NOT_FOUND.getDescription()));
 
         User currentUser = dataService.findUserWithToken();
-        if(currentUser == null) {
+        if (currentUser == null) {
             throw new ScrimException(ErrorDescription.USER_NOT_FOUND.getDescription());
         }
+
+        validateUserNotInOtherScrim(currentUser.getId());
         validateJoinableScrim(scrim, currentUser.getId());
-        System.out.println("Scrim es valido para unirse! --- Agregandote a la cola...");
-        scrim.addParticipant(currentUser);
+        System.out.println("Scrim válido para unirse — agregando participante...");
+        Team assignedTeam = selectTeam(scrim);
+        System.out.println("Equipo asignado: " + assignedTeam.getName());
+
+        boolean captain = Objects.equals(currentUser.getId(), scrim.getIdCreator());
+
+        ScrimParticipant participant = new ScrimParticipant.Builder()
+                .setUser(currentUser)
+                .setCaptain(captain)
+                .setAssignedRole(currentUser.getPreferredRoles().get(0))
+                .setConfirmed(false)
+                .setTeam(assignedTeam)
+                .build();
+
+        assignedTeam.addParticipant(participant);
+
         if (scrim.isFull()) {
             scrim.setStateType(ScrimStateType.LOBBY);
-            System.out.println("Scrim lleno! Cambiando estado a LOBBY...");
+            System.out.println("Scrim lleno — cambiando estado a LOBBY...");
         }
+
         scrimRepository.save(scrim);
         return new ValidationDTOResponse(true, null);
     }
+
 
     @Override
     public List<ScrimDTO> searchAvailableScrims() {
@@ -219,6 +284,13 @@ public class ScrimServiceImpl implements ScrimService {
         }
     }
 
+    @Override
+    public List<User> getUsersFromParticipants(List<ScrimParticipant> participants) {
+        return participants.stream()
+                .map(participant -> dataService.findUserById(participant.getId()))
+                .collect(Collectors.toList());
+    }
+
     private void validateJoinableScrim(Scrim scrim, Long userId) {
         if (scrim == null) {
             throw new ScrimException(ErrorDescription.SCRIM_NOT_FOUND.getDescription());
@@ -229,7 +301,7 @@ public class ScrimServiceImpl implements ScrimService {
         if (scrim.isFull()) {
             throw new ScrimException(ErrorDescription.SCRIM_FULL.getDescription());
         }
-        scrim.getParticipants().stream()
+        scrim.getAllParticipants().stream()
                 .filter(user -> user.getId().equals(userId))
                 .findFirst()
                 .ifPresent(user -> {
@@ -245,5 +317,80 @@ public class ScrimServiceImpl implements ScrimService {
                 List.of(),
                 scrim.getId()
         );
+    }
+
+    private Integer calculateNewMmr(ScrimParticipant participant) {
+        Integer currentMmr = dataService.findUserById(participant.getId()).getMmr();
+        int mmrChange = participant.isWinner()
+                ? 25
+                : -15;
+        return currentMmr + mmrChange;
+    }
+
+
+    /**
+     * Selecciona un equipo de manera balanceada para un nuevo participante en el scrim.
+     *
+     * @param scrim El scrim al que se unirá el participante.
+     * @return El equipo asignado (Team.A o Team.B).
+     */
+    private Team selectTeam(Scrim scrim) {
+        // Obtenemos los equipos
+        Optional<Team> teamAlphaOpt = scrim.getTeams().stream()
+                .filter(t -> t.getName() == TeamName.ALPHA)
+                .findFirst();
+
+        Optional<Team> teamBravoOpt = scrim.getTeams().stream()
+                .filter(t -> t.getName() == TeamName.BRAVO)
+                .findFirst();
+
+        if (teamAlphaOpt.isEmpty() || teamBravoOpt.isEmpty()) {
+            throw new IllegalStateException("Los equipos ALPHA y BRAVO no fueron inicializados en el scrim.");
+        }
+
+        Team teamAlpha = teamAlphaOpt.get();
+        Team teamBravo = teamBravoOpt.get();
+
+        long countAlpha = teamAlpha.getParticipants().size();
+        long countBravo = teamBravo.getParticipants().size();
+
+        Team assignedTeam;
+        if (countAlpha < countBravo) {
+            assignedTeam = teamAlpha;
+        } else if (countBravo < countAlpha) {
+            assignedTeam = teamBravo;
+        } else {
+            assignedTeam = Math.random() < 0.5 ? teamAlpha : teamBravo;
+        }
+
+        return assignedTeam;
+    }
+
+    private void validateUserNotInOtherScrim(Long userId) {
+        List<Scrim> activeScrims = scrimRepository.findAllWithActiveStates();
+        for (Scrim scrim : activeScrims) {
+            boolean userInScrim = scrim.participantInOtherScrim(userId);
+            if (userInScrim) {
+                throw new ScrimException(ErrorDescription.USER_ALREADY_IN_OTHER_SCRIM.getDescription());
+            }
+        }
+    }
+
+
+    private List<Team> constructTeams(Scrim scrim) {
+        Team alpha = new Team.Builder()
+                .name(TeamName.ALPHA)
+                .scrim(scrim)
+                .build();
+
+        Team bravo = new Team.Builder()
+                .name(TeamName.BRAVO)
+                .scrim(scrim)
+                .build();
+
+        List<Team> teams = new ArrayList<>();
+        teams.add(alpha);
+        teams.add(bravo);
+        return teams;
     }
 }

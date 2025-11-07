@@ -6,6 +6,7 @@ import ar.com.uade.pds.final_project.domain.dto.request.JoinScrimRequest;
 import ar.com.uade.pds.final_project.domain.dto.request.MatchmakingRequest;
 import ar.com.uade.pds.final_project.scrim.business.game.state.ScrimStateType;
 import ar.com.uade.pds.final_project.scrim.entity.Scrim;
+import ar.com.uade.pds.final_project.scrim.entity.ScrimParticipant;
 import ar.com.uade.pds.final_project.scrim.exception.MatchmakingException;
 import ar.com.uade.pds.final_project.scrim.service.ScrimService;
 import ar.com.uade.pds.final_project.users.constants.UsersErrorDetails;
@@ -44,23 +45,34 @@ public class CompatibilityStrategy implements MatchMakingStrategy {
         scrimService.joinQueue(new JoinScrimRequest(compatibleScrim.getId()));
     }
 
+    /**
+     * Calcula un puntaje de compatibilidad entre un usuario y un scrim basado en:
+     * - Preferencia de rol (evita duplicados)
+     * - Región similar
+     * - MMR promedio compatible
+     * - Latencia promedio
+     * @param user
+     * @param scrim
+     * @return
+     */
     private double calculateCompatibilityScore(User user, Scrim scrim) {
         double score = 0.0;
-        Set<User> participants = scrim.getParticipants();
+        List<ScrimParticipant> participants = scrim.getAllParticipants();
+        List<User> usersInScrim = scrimService.getUsersFromParticipants(participants);
 
         // Preferencia de rol (evita duplicar)
-        boolean roleConflict = participants.stream()
+        boolean roleConflict = usersInScrim.stream()
                 .anyMatch(p -> Objects.equals(p.getPreferredRoles(), user.getPreferredRoles()));
         if (!roleConflict) score += 0.4;
 
         // Región similar
-        long sameRegionCount = participants.stream()
+        long sameRegionCount = usersInScrim.stream()
                 .filter(p -> Objects.equals(p.getRegion(), user.getRegion()))
                 .count();
         score += 0.1 * sameRegionCount;
 
         // MMR promedio compatible
-        double avgMmr = participants.stream()
+        double avgMmr = usersInScrim.stream()
                 .map(User::getMmr)
                 .filter(Objects::nonNull)
                 .mapToInt(Integer::intValue)
@@ -70,15 +82,15 @@ public class CompatibilityStrategy implements MatchMakingStrategy {
             score += 0.3;
 
         // Latencia promedio (si existe)
-        double avgLatency = participants.stream()
+        double avgLatency = usersInScrim.stream()
                 .map(User::getLatency)
-                .filter(Objects::nonNull)
                 .mapToInt(Integer::intValue)
                 .average()
                 .orElse(100);
-        score += Math.max(0, (180 - avgLatency) / 180.0 * 0.2); // penaliza scrims lentos
+        // penaliza scrims lentos
+        score += Math.max(0, (180 - avgLatency) / 180.0 * 0.2);
 
-        return score; // va de 0 a 1.0
+        return score;
     }
 }
 

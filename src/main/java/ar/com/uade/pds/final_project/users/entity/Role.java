@@ -2,6 +2,7 @@ package ar.com.uade.pds.final_project.users.entity;
 
 import lombok.Getter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -31,14 +32,14 @@ public enum Role {
     }
 
     public static List<Role> oneVsOneRoles() {
-        return List.of(ASSASSIN, MARKSMAN, SUPPORT);
+        return new ArrayList<>(List.of(ASSASSIN, MARKSMAN, SUPPORT));
     }
 
     public static List<Role> twoVsTwoRoles() {
-        return List.of(SNIPER, ASSASSIN, MARKSMAN, SUPPORT);
+        return new ArrayList<>(List.of(SNIPER, ASSASSIN, MARKSMAN, SUPPORT));
     }
 
     public static List<Role> fiveVsFiveRoles() {
-        return List.of(SNIPER, SUPPORT, TANK, WARRIOR, ASSASSIN, MAGE, MARKSMAN);
+       return new ArrayList<>(List.of(SNIPER, SUPPORT, TANK, WARRIOR, ASSASSIN, MAGE, MARKSMAN));
     }
 }

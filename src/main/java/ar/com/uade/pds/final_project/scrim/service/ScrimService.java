@@ -7,8 +7,11 @@ import ar.com.uade.pds.final_project.domain.dto.response.ScrimDTO;
 import ar.com.uade.pds.final_project.domain.dto.response.ValidationDTOResponse;
 import ar.com.uade.pds.final_project.scrim.business.game.state.ScrimStateType;
 import ar.com.uade.pds.final_project.scrim.entity.Scrim;
+import ar.com.uade.pds.final_project.scrim.entity.ScrimParticipant;
+import ar.com.uade.pds.final_project.users.entity.User;
 
 import java.util.List;
+import java.util.Set;
 
 public interface ScrimService {
     ValidationDTOResponse createScrim(ScrimCreationRequest request);
@@ -19,4 +22,5 @@ public interface ScrimService {
     ValidationDTOResponse joinQueue(JoinScrimRequest request);
     List<ScrimDTO> searchAvailableScrims();
     List<Scrim> findAllByStateType(ScrimStateType stateType);
+    List<User> getUsersFromParticipants(List<ScrimParticipant> participants);
 }
