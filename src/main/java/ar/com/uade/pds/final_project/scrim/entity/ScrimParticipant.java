@@ -96,6 +96,7 @@ public class ScrimParticipant {
         public ScrimParticipant build() {
             return new ScrimParticipant(this);
         }
+
     }
 
     public boolean equalIds(Long userId) {
