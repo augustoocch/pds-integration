@@ -46,14 +46,6 @@ public class ScrimServiceImpl implements ScrimService {
     private final TeamManagementService teamManagementService;
 
 
-    /**
-     * Crea un nuevo scrim basado en la solicitud proporcionada.
-     * El usuario autenticado se establece como el creador del scrim.
-     * Al crear el scrim, el creador se une automáticamente a la cola del scrim y se asigna como capitan.
-     *
-     * @param request
-     * @return
-     */
     @Override
     public ValidationDTOResponse createScrim(ScrimCreationRequest request) {
         if (!dataService.checkIsAuthenticated()) {
