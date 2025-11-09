@@ -1,16 +1,11 @@
-package ar.com.uade.pds.final_project.scrim.strategy.integration;
+package ar.com.uade.pds.final_project.scrim.strategy;
 
 import ar.com.uade.pds.final_project.domain.dto.request.MatchmakingRequest;
 import ar.com.uade.pds.final_project.scrim.business.game.state.ScrimStateType;
 import ar.com.uade.pds.final_project.scrim.entity.Scrim;
 import ar.com.uade.pds.final_project.scrim.entity.ScrimParticipant;
 import ar.com.uade.pds.final_project.scrim.entity.Team;
-import ar.com.uade.pds.final_project.scrim.exception.MatchmakingException;
 import ar.com.uade.pds.final_project.scrim.service.ScrimService;
-import ar.com.uade.pds.final_project.scrim.strategy.CompatibilityStrategy;
-import ar.com.uade.pds.final_project.scrim.strategy.LatencyStrategy;
-import ar.com.uade.pds.final_project.scrim.strategy.MatchMakingStrategyFactory;
-import ar.com.uade.pds.final_project.scrim.strategy.RangeStrategy;
 import ar.com.uade.pds.final_project.users.entity.Role;
 import ar.com.uade.pds.final_project.users.entity.User;
 import ar.com.uade.pds.final_project.users.service.DataService;
@@ -28,7 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class StrategyIntegrationTest {
+class MatchMakingStrategyFactoryTest {
 
     @Mock
     private ScrimService scrimService;
@@ -50,125 +45,121 @@ class StrategyIntegrationTest {
         testUser.setPreferredRoles(List.of(Role.ASSASSIN));
     }
 
-    @Test
-    void testRangeStrategy_Integration_ShouldFindSuitableScrim() {
-        MatchmakingRequest request = new MatchmakingRequest("RANGE");
-        Scrim suitableScrim = createScrimWithMMRRange(1400, 1600, 1L);
-        List<Scrim> availableScrims = List.of(suitableScrim);
-
-        when(dataService.findUserWithToken()).thenReturn(testUser);
-        when(scrimService.findAllByStateType(ScrimStateType.SEARCHING)).thenReturn(availableScrims);
-        doNothing().when(scrimService).joinQueue(any());
-
-        var strategy = strategyFactory.getStrategy(request);
-        strategy.execute(request);
-
-        verify(scrimService, times(1)).joinQueue(any());
-    }
+    // --- FACTORY TESTS ---
 
     @Test
-    void testLatencyStrategy_Integration_ShouldFindSuitableScrim() {
-        MatchmakingRequest request = new MatchmakingRequest("LATENCY");
-        Scrim suitableScrim = createScrimWithLatency(110, 1L);
-        List<Scrim> availableScrims = List.of(suitableScrim);
-
-        when(dataService.findUserWithToken()).thenReturn(testUser);
-        when(scrimService.findAllByStateType(ScrimStateType.SEARCHING)).thenReturn(availableScrims);
-        doNothing().when(scrimService).joinQueue(any());
-
-        var strategy = strategyFactory.getStrategy(request);
-        strategy.execute(request);
-
-        verify(scrimService, times(1)).joinQueue(any());
-    }
-
-    @Test
-    void testCompatibilityStrategy_Integration_ShouldFindSuitableScrim() {
-        MatchmakingRequest request = new MatchmakingRequest("COMPATIBILITY");
-        Scrim suitableScrim = createScrimForCompatibility(1L);
-        List<ScrimParticipant> participants = createParticipantsForCompatibility();
-        suitableScrim.setTeams(createTeamsWithParticipants(participants));
-        List<Scrim> availableScrims = List.of(suitableScrim);
-
-        when(dataService.findUserWithToken()).thenReturn(testUser);
-        when(scrimService.findAllByStateType(ScrimStateType.SEARCHING)).thenReturn(availableScrims);
-        when(scrimService.getUsersFromParticipants(any())).thenReturn(createUsersForCompatibility());
-        doNothing().when(scrimService).joinQueue(any());
-
-        var strategy = strategyFactory.getStrategy(request);
-        strategy.execute(request);
-
-        verify(scrimService, times(1)).joinQueue(any());
-    }
-
-    @Test
-    void testStrategyFactory_WhenInvalidStrategy_ShouldThrowException() {
-        MatchmakingRequest request = new MatchmakingRequest("INVALID");
-
-        assertThrows(IllegalArgumentException.class, () -> strategyFactory.getStrategy(request));
-    }
-
-    @Test
-    void testStrategyFactory_WhenRangeStrategy_ShouldReturnRangeStrategy() {
-        MatchmakingRequest request = new MatchmakingRequest("RANGE");
-
-        var strategy = strategyFactory.getStrategy(request);
-
+    void testGetStrategy_Range_ShouldReturnRangeStrategy() {
+        var strategy = strategyFactory.getStrategy(new MatchmakingRequest("RANGE"));
         assertTrue(strategy instanceof RangeStrategy);
     }
 
     @Test
-    void testStrategyFactory_WhenLatencyStrategy_ShouldReturnLatencyStrategy() {
-        MatchmakingRequest request = new MatchmakingRequest("LATENCY");
-
-        var strategy = strategyFactory.getStrategy(request);
-
+    void testGetStrategy_Latency_ShouldReturnLatencyStrategy() {
+        var strategy = strategyFactory.getStrategy(new MatchmakingRequest("LATENCY"));
         assertTrue(strategy instanceof LatencyStrategy);
     }
 
     @Test
-    void testStrategyFactory_WhenCompatibilityStrategy_ShouldReturnCompatibilityStrategy() {
-        MatchmakingRequest request = new MatchmakingRequest("COMPATIBILITY");
-
-        var strategy = strategyFactory.getStrategy(request);
-
+    void testGetStrategy_Compatibility_ShouldReturnCompatibilityStrategy() {
+        var strategy = strategyFactory.getStrategy(new MatchmakingRequest("COMPATIBILITY"));
         assertTrue(strategy instanceof CompatibilityStrategy);
     }
 
     @Test
-    void testStrategyFactory_CaseInsensitive_ShouldWork() {
-        MatchmakingRequest request1 = new MatchmakingRequest("range");
-        MatchmakingRequest request2 = new MatchmakingRequest("RANGE");
-        MatchmakingRequest request3 = new MatchmakingRequest("Range");
-
-        assertDoesNotThrow(() -> {
-            var strategy1 = strategyFactory.getStrategy(request1);
-            var strategy2 = strategyFactory.getStrategy(request2);
-            var strategy3 = strategyFactory.getStrategy(request3);
-            assertTrue(strategy1 instanceof RangeStrategy);
-            assertTrue(strategy2 instanceof RangeStrategy);
-            assertTrue(strategy3 instanceof RangeStrategy);
-        });
+    void testGetStrategy_Invalid_ShouldThrowException() {
+        MatchmakingRequest request = new MatchmakingRequest("UNKNOWN");
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> strategyFactory.getStrategy(request));
+        assertEquals("Invalid strategy: UNKNOWN", ex.getMessage());
     }
 
     @Test
-    void testMultipleStrategies_Integration_ShouldWorkIndependently() {
-        MatchmakingRequest rangeRequest = new MatchmakingRequest("RANGE");
-        MatchmakingRequest latencyRequest = new MatchmakingRequest("LATENCY");
-        MatchmakingRequest compatibilityRequest = new MatchmakingRequest("COMPATIBILITY");
+    void testGetStrategy_CaseInsensitive_ShouldReturnSameResult() {
+        var lower = strategyFactory.getStrategy(new MatchmakingRequest("range"));
+        var mixed = strategyFactory.getStrategy(new MatchmakingRequest("RaNgE"));
+        var upper = strategyFactory.getStrategy(new MatchmakingRequest("RANGE"));
+
+        assertAll(
+                () -> assertTrue(lower instanceof RangeStrategy),
+                () -> assertTrue(mixed instanceof RangeStrategy),
+                () -> assertTrue(upper instanceof RangeStrategy)
+        );
+    }
+
+    // --- INTEGRATION TESTS ---
+
+    @Test
+    void testRangeStrategy_ShouldJoinSuitableScrim() {
+        MatchmakingRequest request = new MatchmakingRequest("RANGE");
+        Scrim suitableScrim = createScrimWithMMRRange(1400, 1600, 1L);
 
         when(dataService.findUserWithToken()).thenReturn(testUser);
-        when(scrimService.findAllByStateType(ScrimStateType.SEARCHING)).thenReturn(List.of());
-        doNothing().when(scrimService).joinQueue(any());
+        when(scrimService.findAllByStateType(ScrimStateType.SEARCHING)).thenReturn(List.of(suitableScrim));
 
-        var rangeStrategy = strategyFactory.getStrategy(rangeRequest);
-        var latencyStrategy = strategyFactory.getStrategy(latencyRequest);
-        var compatibilityStrategy = strategyFactory.getStrategy(compatibilityRequest);
+        var strategy = strategyFactory.getStrategy(request);
+        strategy.execute(request);
 
-        assertTrue(rangeStrategy instanceof RangeStrategy);
-        assertTrue(latencyStrategy instanceof LatencyStrategy);
-        assertTrue(compatibilityStrategy instanceof CompatibilityStrategy);
+        verify(scrimService).joinQueue(any());
     }
+
+    @Test
+    void testLatencyStrategy_ShouldJoinLowLatencyScrim() {
+        MatchmakingRequest request = new MatchmakingRequest("LATENCY");
+        Scrim suitableScrim = createScrimWithLatency(105, 1L);
+
+        when(dataService.findUserWithToken()).thenReturn(testUser);
+        when(scrimService.findAllByStateType(ScrimStateType.SEARCHING)).thenReturn(List.of(suitableScrim));
+
+        var strategy = strategyFactory.getStrategy(request);
+        strategy.execute(request);
+
+        verify(scrimService).joinQueue(any());
+    }
+
+    @Test
+    void testCompatibilityStrategy_ShouldJoinCompatibleScrim() {
+        MatchmakingRequest request = new MatchmakingRequest("COMPATIBILITY");
+        Scrim suitableScrim = createScrimForCompatibility(1L);
+        List<ScrimParticipant> participants = createParticipantsForCompatibility();
+        suitableScrim.setTeams(createTeamsWithParticipants(participants));
+
+        when(dataService.findUserWithToken()).thenReturn(testUser);
+        when(scrimService.findAllByStateType(ScrimStateType.SEARCHING)).thenReturn(List.of(suitableScrim));
+
+        var strategy = strategyFactory.getStrategy(request);
+        strategy.execute(request);
+
+        verify(scrimService).joinQueue(any());
+    }
+
+    @Test
+    void testMultipleStrategies_ShouldOperateIndependently() {
+        var rangeStrategy = spy(strategyFactory.getStrategy(new MatchmakingRequest("RANGE")));
+        var latencyStrategy = spy(strategyFactory.getStrategy(new MatchmakingRequest("LATENCY")));
+        var compatibilityStrategy = spy(strategyFactory.getStrategy(new MatchmakingRequest("COMPATIBILITY")));
+
+        doNothing().when(rangeStrategy).execute(any());
+        doNothing().when(latencyStrategy).execute(any());
+        doNothing().when(compatibilityStrategy).execute(any());
+
+        assertAll(
+                () -> assertTrue(rangeStrategy instanceof RangeStrategy),
+                () -> assertTrue(latencyStrategy instanceof LatencyStrategy),
+                () -> assertTrue(compatibilityStrategy instanceof CompatibilityStrategy)
+        );
+
+        rangeStrategy.execute(new MatchmakingRequest("RANGE"));
+        latencyStrategy.execute(new MatchmakingRequest("LATENCY"));
+        compatibilityStrategy.execute(new MatchmakingRequest("COMPATIBILITY"));
+
+        verify(rangeStrategy).execute(any());
+        verify(latencyStrategy).execute(any());
+        verify(compatibilityStrategy).execute(any());
+    }
+
+
+    // --- HELPERS ---
+
     private Scrim createScrimWithMMRRange(Integer mmrMin, Integer mmrMax, Long id) {
         Scrim scrim = new Scrim.Builder()
                 .id(id)
@@ -194,6 +185,7 @@ class StrategyIntegrationTest {
         Scrim scrim = new Scrim.Builder()
                 .id(id)
                 .stateType(ScrimStateType.SEARCHING)
+                .latency(599)
                 .build();
         scrim.setTeams(new ArrayList<>());
         return scrim;

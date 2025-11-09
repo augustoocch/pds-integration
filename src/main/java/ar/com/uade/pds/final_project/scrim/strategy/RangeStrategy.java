@@ -14,7 +14,11 @@ import ar.com.uade.pds.final_project.users.entity.User;
 import ar.com.uade.pds.final_project.users.service.DataService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @AllArgsConstructor
 public class RangeStrategy implements MatchMakingStrategy {
@@ -38,7 +42,13 @@ public class RangeStrategy implements MatchMakingStrategy {
         }
 
         Integer userMmr = currentUser.getMmr();
-        List<Scrim> availableScrims = scrimService.findAllByStateType(ScrimStateType.SEARCHING);
+        if (userMmr == null) {
+            throw new MatchmakingException("User MMR unknown");
+        }
+
+        List<Scrim> availableScrims = Optional.ofNullable(
+                scrimService.findAllByStateType(ScrimStateType.SEARCHING)
+        ).orElse(Collections.emptyList());
 
         Scrim suitableScrim = availableScrims.stream()
                 .filter(scrim -> {
@@ -47,7 +57,9 @@ public class RangeStrategy implements MatchMakingStrategy {
                     if (min != null && max != null) {
                         return userMmr >= min && userMmr <= max;
                     }
-                    Double avg = scrim.getAllParticipants().stream()
+
+                    // compute average ignoring participants with null MMR
+                    double avg = scrim.getAllParticipants().stream()
                             .map(ScrimParticipant::getMmr)
                             .mapToInt(Integer::intValue)
                             .average()

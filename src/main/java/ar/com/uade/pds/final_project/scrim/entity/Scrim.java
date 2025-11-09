@@ -69,7 +69,8 @@ public class Scrim {
         this.players = builder.players;
         this.roles = builder.roles;
         this.region = builder.region;
-        this.latency = builder.latency;
+        this.latency = builder.latency
+                != null ? builder.latency : 50;
         this.estDuration = builder.estDuration;
         this.mode = builder.mode;
         this.state = builder.state != null ? builder.state : new Searching();
@@ -123,6 +124,10 @@ public class Scrim {
 
     public void confirm(User user) {
         this.state.confirm(this, user);
+    }
+
+    public void start() {
+        this.state.start(this);
     }
 
     public void cancel(Long userId) {

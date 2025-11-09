@@ -42,6 +42,7 @@ public class Lobby implements ScrimState {
         if (allConfirmed) {
             log.info("Todos los usuarios confirmaron. Scrim confirmado!");
             scrim.setState(new Confirmed(scrim));
+            scrim.start();
         }
     }
 

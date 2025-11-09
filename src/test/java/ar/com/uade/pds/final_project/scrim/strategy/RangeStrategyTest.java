@@ -2,6 +2,7 @@ package ar.com.uade.pds.final_project.scrim.strategy;
 
 import ar.com.uade.pds.final_project.domain.dto.request.JoinScrimRequest;
 import ar.com.uade.pds.final_project.domain.dto.request.MatchmakingRequest;
+import ar.com.uade.pds.final_project.domain.dto.response.ValidationDTOResponse;
 import ar.com.uade.pds.final_project.scrim.business.game.state.ScrimStateType;
 import ar.com.uade.pds.final_project.scrim.entity.Scrim;
 import ar.com.uade.pds.final_project.scrim.entity.ScrimParticipant;
@@ -24,7 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ByMMRStrategyTest {
+class RangeStrategyTest {
 
     @Mock
     private ScrimService scrimService;
@@ -52,7 +53,8 @@ class ByMMRStrategyTest {
 
         when(dataService.findUserWithToken()).thenReturn(testUser);
         when(scrimService.findAllByStateType(ScrimStateType.SEARCHING)).thenReturn(availableScrims);
-        doNothing().when(scrimService).joinQueue(any(JoinScrimRequest.class));
+        when(scrimService.joinQueue(any())).thenReturn(new ValidationDTOResponse(true, null));
+
 
         rangeStrategy.execute(request);
 
@@ -68,6 +70,28 @@ class ByMMRStrategyTest {
         assertThrows(MatchmakingException.class, () -> rangeStrategy.execute(request));
         verify(dataService, times(1)).findUserWithToken();
         verify(scrimService, never()).findAllByStateType(any());
+        verify(scrimService, never()).joinQueue(any());
+    }
+
+    @Test
+    void testExecute_WhenUserMmrIsNull_ShouldThrowException() {
+        User anon = new User();
+        anon.setId(2L);
+        anon.setMmr(null); // missing MMR
+        when(dataService.findUserWithToken()).thenReturn(anon);
+
+        assertThrows(MatchmakingException.class, () -> rangeStrategy.execute(request));
+        verify(scrimService, never()).findAllByStateType(any());
+        verify(scrimService, never()).joinQueue(any());
+    }
+
+    @Test
+    void testExecute_WhenAvailableScrimsIsNull_ShouldThrowException() {
+        when(dataService.findUserWithToken()).thenReturn(testUser);
+        when(scrimService.findAllByStateType(ScrimStateType.SEARCHING)).thenReturn(null);
+
+        assertThrows(MatchmakingException.class, () -> rangeStrategy.execute(request));
+        verify(scrimService, times(1)).findAllByStateType(ScrimStateType.SEARCHING);
         verify(scrimService, never()).joinQueue(any());
     }
 
@@ -88,12 +112,13 @@ class ByMMRStrategyTest {
         Scrim scrimWithoutRange = createScrimWithoutMMRRange(1L);
         List<ScrimParticipant> participants = createParticipantsWithMMR(List.of(1450, 1550, 1500));
         scrimWithoutRange.setTeams(createTeamsWithParticipants(participants));
-        
+
         List<Scrim> availableScrims = List.of(scrimWithoutRange);
 
         when(dataService.findUserWithToken()).thenReturn(testUser);
         when(scrimService.findAllByStateType(ScrimStateType.SEARCHING)).thenReturn(availableScrims);
-        doNothing().when(scrimService).joinQueue(any(JoinScrimRequest.class));
+        when(scrimService.joinQueue(any())).thenReturn(new ValidationDTOResponse(true, null));
+
 
         rangeStrategy.execute(request);
 
@@ -105,7 +130,7 @@ class ByMMRStrategyTest {
         Scrim scrimWithoutRange = createScrimWithoutMMRRange(1L);
         List<ScrimParticipant> participants = createParticipantsWithMMR(List.of(2500, 2600, 2700));
         scrimWithoutRange.setTeams(createTeamsWithParticipants(participants));
-        
+
         List<Scrim> availableScrims = List.of(scrimWithoutRange);
 
         when(dataService.findUserWithToken()).thenReturn(testUser);
@@ -123,7 +148,8 @@ class ByMMRStrategyTest {
 
         when(dataService.findUserWithToken()).thenReturn(testUser);
         when(scrimService.findAllByStateType(ScrimStateType.SEARCHING)).thenReturn(availableScrims);
-        doNothing().when(scrimService).joinQueue(any(JoinScrimRequest.class));
+        when(scrimService.joinQueue(any())).thenReturn(new ValidationDTOResponse(true, null));
+
 
         rangeStrategy.execute(request);
 
@@ -138,7 +164,8 @@ class ByMMRStrategyTest {
 
         when(dataService.findUserWithToken()).thenReturn(testUser);
         when(scrimService.findAllByStateType(ScrimStateType.SEARCHING)).thenReturn(availableScrims);
-        doNothing().when(scrimService).joinQueue(any(JoinScrimRequest.class));
+        when(scrimService.joinQueue(any())).thenReturn(new ValidationDTOResponse(true, null));
+
 
         rangeStrategy.execute(request);
 
@@ -153,17 +180,21 @@ class ByMMRStrategyTest {
 
         when(dataService.findUserWithToken()).thenReturn(testUser);
         when(scrimService.findAllByStateType(ScrimStateType.SEARCHING)).thenReturn(availableScrims);
-        doNothing().when(scrimService).joinQueue(any(JoinScrimRequest.class));
+        when(scrimService.joinQueue(any())).thenReturn(new ValidationDTOResponse(true, null));
 
         rangeStrategy.execute(request);
 
         verify(scrimService, times(1)).joinQueue(any(JoinScrimRequest.class));
     }
+
+    // --- HELPERS ---
+
     private Scrim createScrimWithMMRRange(Integer mmrMin, Integer mmrMax, Long id) {
         Scrim scrim = new Scrim.Builder()
                 .id(id)
                 .mmrMin(mmrMin)
                 .mmrMax(mmrMax)
+                .latency(500)
                 .stateType(ScrimStateType.SEARCHING)
                 .build();
         scrim.setTeams(new ArrayList<>());
@@ -175,8 +206,10 @@ class ByMMRStrategyTest {
                 .id(id)
                 .mmrMin(null)
                 .mmrMax(null)
+                .latency(500)
                 .stateType(ScrimStateType.SEARCHING)
                 .build();
+        scrim.setTeams(new ArrayList<>());
         return scrim;
     }
 

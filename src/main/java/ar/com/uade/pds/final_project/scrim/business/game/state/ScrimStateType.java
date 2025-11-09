@@ -10,6 +10,7 @@ public enum ScrimStateType {
     CONFIRMED(Confirmed.class),
     CANCELLED(Cancelled.class),
     LOBBY(Lobby.class),
+    ENDED(Ended.class),
     IN_GAME(InGame.class);
 
     private final Class<? extends ScrimState> stateClass;

@@ -1,6 +1,5 @@
 package ar.com.uade.pds.final_project.domain.dto.response;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 

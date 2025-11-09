@@ -26,7 +26,6 @@ public class Confirmed implements ScrimState {
                 subscribersToNotify,
                 scrim.getId()
         ));
-        this.start(scrim);
     }
 
     @Override
