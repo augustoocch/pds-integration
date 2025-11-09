@@ -11,7 +11,6 @@ import ar.com.uade.pds.final_project.users.entity.User;
 import ar.com.uade.pds.final_project.users.service.DataService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service

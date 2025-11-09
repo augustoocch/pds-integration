@@ -1,17 +1,9 @@
 package ar.com.uade.pds.final_project.menu;
 
-
 import ar.com.uade.pds.final_project.domain.controller.NotificationController;
-import ar.com.uade.pds.final_project.domain.controller.ScrimController;
-import ar.com.uade.pds.final_project.domain.dto.request.JoinScrimRequest;
-import ar.com.uade.pds.final_project.domain.dto.request.ScrimCreationRequest;
-import ar.com.uade.pds.final_project.domain.dto.request.SearchRequest;
 import ar.com.uade.pds.final_project.domain.dto.response.ResponseWrapper;
-import ar.com.uade.pds.final_project.domain.dto.response.ScrimDTO;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 import java.util.Scanner;
 
 @Component

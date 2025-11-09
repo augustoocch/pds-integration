@@ -6,7 +6,6 @@ import ar.com.uade.pds.final_project.notifications.repository.NotificationReposi
 import ar.com.uade.pds.final_project.notifications.service.NotificationFactory;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

@@ -6,7 +6,6 @@ import ar.com.uade.pds.final_project.domain.dto.response.ResponseWrapper;
 import ar.com.uade.pds.final_project.domain.dto.response.ValidationDTOResponse;
 import ar.com.uade.pds.final_project.scrim.exception.ScrimException;
 import ar.com.uade.pds.final_project.scrim.service.TeamManagementService;
-import ar.com.uade.pds.final_project.users.entity.Role;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;

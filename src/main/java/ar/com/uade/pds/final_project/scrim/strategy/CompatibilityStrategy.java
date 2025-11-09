@@ -15,11 +15,14 @@ import ar.com.uade.pds.final_project.users.exception.UsersException;
 import ar.com.uade.pds.final_project.users.service.DataService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+@Slf4j
 @AllArgsConstructor
 public class CompatibilityStrategy implements MatchMakingStrategy {
 
@@ -36,6 +39,7 @@ public class CompatibilityStrategy implements MatchMakingStrategy {
             throw new UsersException(UsersErrorDetails.USER_NOT_AUTHENTICATED.getMessage());
         }
 
+        log.info("Executing compatibility-based matchmaking for user ID: {}", currentUser.getId());
         List<Scrim> availableScrims = scrimService.findAllByStateType(ScrimStateType.SEARCHING);
 
         Scrim compatibleScrim = availableScrims.stream()

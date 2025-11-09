@@ -14,12 +14,15 @@ import ar.com.uade.pds.final_project.users.entity.User;
 import ar.com.uade.pds.final_project.users.service.DataService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+@Slf4j
 @AllArgsConstructor
 public class RangeStrategy implements MatchMakingStrategy {
 
@@ -45,7 +48,7 @@ public class RangeStrategy implements MatchMakingStrategy {
         if (userMmr == null) {
             throw new MatchmakingException("User MMR unknown");
         }
-
+        log.info("Executing RangeStrategy for user ID: " + currentUser.getId() + " with MMR: " + userMmr);
         List<Scrim> availableScrims = Optional.ofNullable(
                 scrimService.findAllByStateType(ScrimStateType.SEARCHING)
         ).orElse(Collections.emptyList());

@@ -1,7 +1,6 @@
 package ar.com.uade.pds.final_project.users.entity;
 
 import lombok.Getter;
-
 import java.util.ArrayList;
 import java.util.List;
 

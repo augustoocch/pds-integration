@@ -1,6 +1,5 @@
 package ar.com.uade.pds.final_project.users.service.impl;
 
-import ar.com.uade.pds.final_project.domain.dto.response.UserDTO;
 import ar.com.uade.pds.final_project.security.ISecurityValidator;
 import ar.com.uade.pds.final_project.users.business.SessionContext;
 import ar.com.uade.pds.final_project.users.constants.UsersErrorDetails;
@@ -19,20 +18,6 @@ public class DataServiceImpl implements DataService {
 
     public boolean checkIsAuthenticated() {
         return SessionContext.getInstance().isAuthenticated();
-    }
-
-    @Override
-    public UserDTO findDTOUserWithToken() {
-        String token = SessionContext.getInstance().getToken();
-        User user = this.securityValidator.getUserFromToken(token);
-
-        return new UserDTO.Builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .preferredRoles(user.getPreferredRoles())
-                .region(user.getRegion())
-                .build();
     }
 
     @Override

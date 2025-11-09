@@ -5,7 +5,6 @@ import ar.com.uade.pds.final_project.notifications.model.DiscordSubscriber;
 import ar.com.uade.pds.final_project.notifications.model.EmailSubscriber;
 import ar.com.uade.pds.final_project.notifications.model.ISubscriber;
 import ar.com.uade.pds.final_project.notifications.model.PushSubscriber;
-
 import java.util.Map;
 
 public class NotificationFactory {

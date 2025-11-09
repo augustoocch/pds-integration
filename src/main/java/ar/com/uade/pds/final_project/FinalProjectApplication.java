@@ -1,9 +1,6 @@
 package ar.com.uade.pds.final_project;
 
-import ar.com.uade.pds.final_project.domain.controller.AuthController;
-import ar.com.uade.pds.final_project.domain.controller.NotificationController;
-import ar.com.uade.pds.final_project.domain.controller.ScrimController;
-import ar.com.uade.pds.final_project.domain.controller.TeamManagementController;
+import ar.com.uade.pds.final_project.domain.controller.*;
 import ar.com.uade.pds.final_project.domain.dto.request.*;
 import ar.com.uade.pds.final_project.menu.AuthMenu;
 import ar.com.uade.pds.final_project.menu.NotificationsMenu;
@@ -25,9 +22,10 @@ public class FinalProjectApplication {
         ScrimController scrimController = context.getBean(ScrimController.class);
         NotificationController notificationController = context.getBean(NotificationController.class);
         TeamManagementController teamManagementController = context.getBean(TeamManagementController.class);
+        MatchmakingController matchmakingController = context.getBean(MatchmakingController.class);
 
         AuthMenu authMenu = new AuthMenu(authController);
-        ScrimMenu scrimMenu = new ScrimMenu(scrimController, teamManagementController);
+        ScrimMenu scrimMenu = new ScrimMenu(scrimController, teamManagementController, matchmakingController);
         NotificationsMenu notificationsMenu = new NotificationsMenu(notificationController);
 
         Scanner scanner = new Scanner(System.in);

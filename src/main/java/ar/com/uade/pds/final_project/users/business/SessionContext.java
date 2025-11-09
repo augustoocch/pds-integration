@@ -2,7 +2,6 @@ package ar.com.uade.pds.final_project.users.business;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 @Getter
 @Slf4j

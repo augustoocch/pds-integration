@@ -4,7 +4,6 @@ import ar.com.uade.pds.final_project.scrim.entity.PlayerStats;
 import ar.com.uade.pds.final_project.users.constants.Rank;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.ArrayList;
 import java.util.List;
 

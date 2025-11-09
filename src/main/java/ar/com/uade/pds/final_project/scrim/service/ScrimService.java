@@ -9,9 +9,7 @@ import ar.com.uade.pds.final_project.scrim.business.game.state.ScrimStateType;
 import ar.com.uade.pds.final_project.scrim.entity.Scrim;
 import ar.com.uade.pds.final_project.scrim.entity.ScrimParticipant;
 import ar.com.uade.pds.final_project.users.entity.User;
-
 import java.util.List;
-import java.util.Set;
 
 public interface ScrimService {
     ValidationDTOResponse createScrim(ScrimCreationRequest request);

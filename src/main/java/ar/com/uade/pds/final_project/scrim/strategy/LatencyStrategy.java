@@ -14,9 +14,12 @@ import ar.com.uade.pds.final_project.users.exception.UsersException;
 import ar.com.uade.pds.final_project.users.service.DataService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.Comparator;
 import java.util.List;
 
+@Slf4j
 @AllArgsConstructor
 public class LatencyStrategy implements MatchMakingStrategy {
 
@@ -38,7 +41,7 @@ public class LatencyStrategy implements MatchMakingStrategy {
         if (currentUser == null) {
             throw new UsersException(UsersErrorDetails.USER_NOT_AUTHENTICATED.getMessage());
         }
-
+        log.info("Executing latency-based matchmaking for user ID: {}", currentUser.getId());
         int userLatency = currentUser.getLatency();
         List<Scrim> availableScrims = scrimService.findAllByStateType(ScrimStateType.SEARCHING);
 

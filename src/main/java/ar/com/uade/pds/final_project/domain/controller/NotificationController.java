@@ -1,13 +1,13 @@
 package ar.com.uade.pds.final_project.domain.controller;
 
+import static ar.com.uade.pds.final_project.domain.controller.handler.ResponseHandler.buildResponse;
+import static ar.com.uade.pds.final_project.domain.controller.handler.ResponseHandler.handleError;
+
 import ar.com.uade.pds.final_project.domain.dto.response.ResponseWrapper;
 import ar.com.uade.pds.final_project.notifications.service.NotificationService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
-
-import static ar.com.uade.pds.final_project.domain.controller.handler.ResponseHandler.buildResponse;
-import static ar.com.uade.pds.final_project.domain.controller.handler.ResponseHandler.handleError;
 
 @Controller
 @AllArgsConstructor

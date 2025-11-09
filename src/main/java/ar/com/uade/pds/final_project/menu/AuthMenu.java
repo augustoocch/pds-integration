@@ -1,6 +1,5 @@
 package ar.com.uade.pds.final_project.menu;
 
-
 import ar.com.uade.pds.final_project.domain.controller.AuthController;
 import ar.com.uade.pds.final_project.domain.dto.request.AuthenticationRequest;
 import ar.com.uade.pds.final_project.domain.dto.request.EmailVerificationRequest;
@@ -9,7 +8,6 @@ import ar.com.uade.pds.final_project.domain.dto.response.ResponseWrapper;
 import ar.com.uade.pds.final_project.domain.dto.response.ValidationDTOResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
 import java.util.Scanner;
 
 @Slf4j

@@ -1,12 +1,12 @@
 package ar.com.uade.pds.final_project.menu;
 
 
+import ar.com.uade.pds.final_project.domain.controller.MatchmakingController;
 import ar.com.uade.pds.final_project.domain.controller.ScrimController;
 import ar.com.uade.pds.final_project.domain.controller.TeamManagementController;
 import ar.com.uade.pds.final_project.domain.dto.request.*;
 import ar.com.uade.pds.final_project.domain.dto.response.ResponseWrapper;
 import ar.com.uade.pds.final_project.domain.dto.response.ScrimDTO;
-import ar.com.uade.pds.final_project.users.entity.Role;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +18,7 @@ public class ScrimMenu {
 
     private final ScrimController scrimController;
     private final TeamManagementController teamManagementController;
+    private final MatchmakingController matchmakingController;
 
     public void show(Scanner scanner) {
         boolean back = false;
@@ -29,9 +30,10 @@ public class ScrimMenu {
             System.out.println("4. Confirmar scrim");
             System.out.println("5. Buscar scrims");
             System.out.println("6. Unirse a una cola");
-            System.out.println("7. Asignar rol a jugador");
-            System.out.println("8. Intercambiar jugadores");
-            System.out.println("9. Deshacer última acción");
+            System.out.println("7. Matchmaking");
+            System.out.println("8. Asignar rol a jugador");
+            System.out.println("9. Intercambiar jugadores");
+            System.out.println("10. Deshacer última acción");
             System.out.println("0. Volver al menú principal");
             System.out.print("Selecciona una opción: ");
 
@@ -43,9 +45,10 @@ public class ScrimMenu {
                 case "4" -> handleConfirmScrim(scanner);
                 case "5" -> handleSearchScrim(scanner);
                 case "6" -> handleJoinQueue(scanner);
-                case "7" -> handleAssignRole(scanner);
-                case "8" -> handleSwapPlayers(scanner);
-                case "9" -> handleUndoLastAction();
+                case "7" -> handleMatchmaking(scanner);
+                case "8" -> handleAssignRole(scanner);
+                case "9" -> handleSwapPlayers(scanner);
+                case "10" -> handleUndoLastAction();
                 case "0" -> back = true;
                 default -> System.out.println("Opción inválida.");
             }
@@ -111,6 +114,14 @@ public class ScrimMenu {
         Long idScrim = Long.parseLong(scanner.nextLine());
         JoinScrimRequest request = new JoinScrimRequest(idScrim);
         ResponseWrapper response = scrimController.joinQueue(request);
+        System.out.println(response.getMessage());
+    }
+
+    private void handleMatchmaking(Scanner scanner) {
+        System.out.print("Tipo de busqueda (range, latency, compatibility): ");
+        String type = scanner.nextLine();
+        MatchmakingRequest request = new MatchmakingRequest(type);
+        ResponseWrapper response = matchmakingController.joinMatchmakingScrim(request);
         System.out.println(response.getMessage());
     }
 

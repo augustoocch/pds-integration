@@ -2,7 +2,6 @@ package ar.com.uade.pds.final_project.scrim.service.impl;
 
 import ar.com.uade.pds.final_project.domain.dto.request.*;
 import ar.com.uade.pds.final_project.domain.dto.response.ScrimDTO;
-import ar.com.uade.pds.final_project.domain.dto.response.UserDTO;
 import ar.com.uade.pds.final_project.domain.dto.response.ValidationDTOResponse;
 import ar.com.uade.pds.final_project.notifications.event.DomainEvent;
 import ar.com.uade.pds.final_project.notifications.event.EventType;

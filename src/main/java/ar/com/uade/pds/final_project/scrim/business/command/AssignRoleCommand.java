@@ -1,6 +1,5 @@
 package ar.com.uade.pds.final_project.scrim.business.command;
 
-
 import ar.com.uade.pds.final_project.notifications.event.DomainEvent;
 import ar.com.uade.pds.final_project.notifications.event.EventType;
 import ar.com.uade.pds.final_project.scrim.entity.Scrim;
