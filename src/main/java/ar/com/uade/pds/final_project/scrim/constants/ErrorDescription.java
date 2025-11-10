@@ -7,6 +7,7 @@ public enum ErrorDescription {
     SCRIM_FULL("Scrim is full"),
     INVALID_SCRIM_STATE("Invalid scrim state for this operation"),
     SCRIM_CANNOT_CHANGE_STATE("Scrim cannot be ended in its current state"),
+    USER_NOT_AUTHORIZED("User not authorized to perform this action"),
     USER_ALREADY_IN_OTHER_SCRIM("User is already participating in other scrim"),
     USER_ALREADY_IN_SCRIM("User is already participating in this scrim"),
     RANGE_MATCHMAKING_ERROR("No suitable scrim found for MMR range"),

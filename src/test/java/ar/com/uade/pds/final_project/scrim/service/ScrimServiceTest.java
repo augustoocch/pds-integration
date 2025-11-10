@@ -200,6 +200,34 @@ class ScrimServiceTest {
         verify(scrimRepository, times(1)).save(scrim);
     }
 
+
+    @Test
+    void testEndScrim_ThrowsError() {
+        ScrimParticipant participant = new ScrimParticipant.Builder()
+                .setId(1L)
+                .setUser(currentUser)
+                .build();
+        participant.setWinner(true);
+        participant.setScore(100);
+        team.setParticipants(List.of(participant));
+        scrim.addTeams(List.of(team));
+        scrim.setRoles(List.of(Role.SNIPER));
+        scrim.setState(new InGame());
+        scrim.setStateType(ScrimStateType.IN_GAME);
+
+        User userCreator = new User.Builder()
+                .id(2L)
+                .username("anotheruser")
+                .build();
+
+        when(dataService.checkIsAuthenticated()).thenReturn(true);
+        when(dataService.findUserWithToken()).thenReturn(userCreator);
+        when(scrimRepository.findById(1L)).thenReturn(Optional.of(scrim));
+
+        assertThrows(ScrimException.class,
+                () -> scrimService.endScrim(1L));
+    }
+
     @Test
     void testEndScrim_ScrimNotFound() {
         when(dataService.checkIsAuthenticated()).thenReturn(true);
@@ -224,6 +252,22 @@ class ScrimServiceTest {
         assertNotNull(result);
         assertTrue(result.isValid());
         verify(scrimRepository, times(1)).save(scrim);
+    }
+
+
+    @Test
+    void testCancelScrim_ThrowsError() {
+        when(dataService.checkIsAuthenticated()).thenReturn(true);
+        when(scrimRepository.findById(1L)).thenReturn(Optional.of(scrim));
+        when(dataService.findUserWithToken()).thenReturn(currentUser);
+        User userCreator = new User.Builder()
+                .id(2L)
+                .username("anotheruser")
+                .build();
+        when(dataService.findUserWithToken()).thenReturn(userCreator);
+
+        assertThrows(ScrimException.class,
+                () -> scrimService.cancelScrim(1L));
     }
 
     @Test

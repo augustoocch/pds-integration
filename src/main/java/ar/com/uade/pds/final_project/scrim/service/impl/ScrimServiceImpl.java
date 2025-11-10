@@ -99,6 +99,11 @@ public class ScrimServiceImpl implements ScrimService {
         Scrim scrim = scrimRepository.findById(id)
                 .orElseThrow(() -> new ScrimException(ErrorDescription.SCRIM_NOT_FOUND.getDescription()));
 
+        User currentUser = dataService.findUserWithToken();
+        if(!Objects.equals(scrim.getIdCreator(), currentUser.getId())) {
+            throw new ScrimException(ErrorDescription.USER_NOT_AUTHORIZED.getDescription());
+        }
+
         scrim.setCurrentState();
         scrim.end();
         for (ScrimParticipant participant : scrim.getAllParticipants()) {
@@ -141,6 +146,11 @@ public class ScrimServiceImpl implements ScrimService {
         if (currentUser == null) {
             throw new ScrimException(ErrorDescription.USER_NOT_FOUND.getDescription());
         }
+
+        if(!Objects.equals(scrim.getIdCreator(), currentUser.getId())) {
+            throw new ScrimException(ErrorDescription.USER_NOT_AUTHORIZED.getDescription());
+        }
+
         scrim.setCurrentState();
         scrim.cancel(currentUser.getId());
         scrimRepository.save(scrim);
