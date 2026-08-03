@@ -1,0 +1,12 @@
+name: Archynt architecture scan
+on: pull_request
+
+jobs:
+  archynt-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: archynt/pr-check-action@v1
+        with:
+          language: java

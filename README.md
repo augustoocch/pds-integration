@@ -1,4 +1,9 @@
+## Archynt scan
+
+[![Architecture Score](https://img.shields.io/endpoint?url=https://api.archynt.com/api/v1/public/badge/augustoocch/pds-integration)](https://archynt.com)
+
 ## 🚀 Pasos para ejecutar el proyecto
+
 1. Levantar la Base de Datos
 
 a) Descargar docker compose
